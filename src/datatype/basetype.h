@@ -48,7 +48,7 @@ namespace jimdb
 
             //inlines not realy needed since the template forces inline
             inline void setNext(const ptrdiff_t& next);
-            inline ::std::ptrdiff_t getNext();
+            inline std::ptrdiff_t getNext();
             inline void setData(T& t);
             inline void setData(const T& t);
             inline T getData() const;

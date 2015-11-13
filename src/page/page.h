@@ -144,7 +144,7 @@ namespace jimdb
             @author Benjamin Meyer
             @date 29.10.2015 12:12
             */
-            std::pair<void*, void*> insertObject(const rapidjson::GenericValue<rapidjson::UTF8<>>& value, BaseType<size_t>* l_last);
+            std::pair<void*, void*> insertObject(const rapidjson::GenericValue<rapidjson::UTF8<>>& value, BaseType<size_t>* const l_last);
 
             /**
             \brief returns a ptr to the slot where it can fit

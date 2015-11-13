@@ -153,7 +153,7 @@ namespace jimdb
             rapidjson::Value l_value;
             l_value.SetObject();
             //calc the start id
-            void* start = static_cast<char*>(m_body) + l_header->getPos();
+            void* start = (static_cast<char*>(m_body) + l_header->getPos());
             buildObject(l_objectType, start, l_value, l_obj.GetAllocator());
 
             //generate name
@@ -180,7 +180,7 @@ namespace jimdb
         */
 
         std::pair<void*, void*> Page::insertObject(const rapidjson::GenericValue<rapidjson::UTF8<>>& value,
-                BaseType<size_t>* last)
+                BaseType<size_t>* const last)
         {
             //return ptr to the first element
             void* l_ret = nullptr;
@@ -201,9 +201,6 @@ namespace jimdb
                     case rapidjson::kFalseType:
                     case rapidjson::kTrueType:
                         {
-                            //doesnt matter since long long and double are equal on
-                            // x64
-                            //find pos where the string fits
                             l_pos = find(sizeof(BaseType<bool>));
 
                             void* l_new = new (l_pos) BaseType<bool>(it->value.GetBool());
@@ -222,7 +219,6 @@ namespace jimdb
 
                             if (l_prev != nullptr)
                                 l_prev->setNext(dist(l_prev, l_new));
-							//TODO something strange happens here!
 
                             // pass the objid Object to the insertobj!
                             // now recursive insert the obj
@@ -234,7 +230,8 @@ namespace jimdb
                         break;
 
                     case rapidjson::kArrayType:
-                        {/**
+                        {
+
                             //now insert values
                             l_pos = find(sizeof(ArrayType));
 
@@ -247,8 +244,8 @@ namespace jimdb
                             //insert elements
 
                             l_pos = insertArray(it->value, static_cast<BaseType<size_t>*>(l_new));
-                        */
-						}
+
+                        }
                         break;
 
                     case rapidjson::kStringType:
@@ -256,7 +253,7 @@ namespace jimdb
                             // find pos where the string fits
                             // somehow we get here sometimes and it does not fit!
                             // which cant be since we lock the whole page
-                            l_pos = find(sizeof(StringType) + strlen(it->value.GetString()));
+                            l_pos = find(sizeof(StringType) + it->value.GetStringLength());
 
                             //add the String Type at the pos of the FreeType
                             auto* l_new = new (l_pos) StringType(it->value.GetString());
@@ -401,8 +398,7 @@ namespace jimdb
 
         void* Page::insertArray(const rapidjson::GenericValue<rapidjson::UTF8<>>& arr, BaseType<size_t>* prev)
         {
-			ArrayItem<size_t>* l_prev = reinterpret_cast<ArrayItem<size_t>*>(prev);
-            void* l_ret = nullptr;
+            ArrayItem<size_t>* l_prev = reinterpret_cast<ArrayItem<size_t>*>(prev);
             for (auto arrayIt = arr.Begin(); arrayIt != arr.End(); ++arrayIt)
             {
                 void* l_pos = nullptr;
@@ -421,30 +417,31 @@ namespace jimdb
 
                             void* l_new = new (l_pos) ArrayItem<bool>(arrayIt->GetBool(), BOOL);
 
-                            if (prev != nullptr)
-                                prev->setNext(dist(prev, l_new));
+                            if (l_prev != nullptr)
+                                l_prev->setNext(dist(l_prev, l_new));
                         }
                         break;
                     case rapidjson::kObjectType:
                         break;
                     case rapidjson::kArrayType:
                         {
-                            l_pos = find(sizeof(ArrayType));
+                            l_pos = find(sizeof(ArrayItem<size_t>));
                             //add the number of elements
-                            void* l_new = new(l_pos) ArrayType(arrayIt->Size());
-                            if (prev != nullptr)
-                                prev->setNext(dist(prev, l_new));
+                            void* l_new = new(l_pos) ArrayItem<size_t>(arrayIt->Size(), ARRAY);
+                            if (l_prev != nullptr)
+                                l_prev->setNext(dist(l_prev, l_new));
                             l_pos = insertArray(*arrayIt, static_cast<BaseType<size_t>*>(l_pos));
                         }
                         break;
                     case rapidjson::kStringType:
                         {
-                            l_pos = find(sizeof(ArrayItemString) + strlen(arrayIt->GetString()));
+
+                            l_pos = find(sizeof(ArrayItemString) + arrayIt->GetStringLength());
 
                             void* l_new = new (l_pos) ArrayItemString(arrayIt->GetString());
 
-                            if (prev != nullptr)
-                                prev->setNext(dist(prev, l_new));
+                            if (l_prev != nullptr)
+                                l_prev->setNext(dist(l_prev, l_new));
                         }
                         break;
                     case rapidjson::kNumberType:
@@ -473,8 +470,6 @@ namespace jimdb
                     default:
                         break;
                 }
-                //at the last "FreeType" we inserted the Last element
-                l_ret = l_pos;
                 //update the prev
                 l_prev = reinterpret_cast<ArrayItem<size_t>*>(l_pos);
             }
@@ -628,6 +623,7 @@ namespace jimdb
                             auto l_data = static_cast<BaseType<long long>*>(l_ptr);
                             //with length attribute it's faster ;)
                             l_value = l_data->getData();
+                            l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
                         }
                         break;
                     case meta::DOUBLE:
@@ -636,6 +632,7 @@ namespace jimdb
                             auto l_data = static_cast<BaseType<double>*>(l_ptr);
                             //with length attribute it's faster ;)
                             l_value = l_data->getData();
+                            l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
                         }
                         break;
                     case meta::STRING:
@@ -644,6 +641,7 @@ namespace jimdb
                             auto l_data = static_cast<StringType*>(l_ptr);
                             //with length attribute it's faster
                             l_value.SetString(l_data->getString()->c_str(), l_data->getString()->length(), aloc);
+                            l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
                         }
                         break;
                     case meta::BOOL:
@@ -651,6 +649,7 @@ namespace jimdb
                             //create the data
                             auto l_data = static_cast<BaseType<bool>*>(l_ptr);
                             l_value = l_data->getData();
+                            l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
                         }
                         break;
                     default:
@@ -658,7 +657,6 @@ namespace jimdb
                 }
                 l_obj.AddMember(l_name, l_value, aloc);
                 //update the lptr
-                l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
             }
             //return the l_ptr which current shows to the next lement. //see line above
             return l_ptr;
@@ -667,8 +665,7 @@ namespace jimdb
         void* Page::buildArray(const long long& elemCount, void* start, rapidjson::Value& toAdd,
                                rapidjson::MemoryPoolAllocator<>& aloc)
         {
-            auto l_ptr = start;
-			ArrayItem<size_t>* l_element = static_cast<ArrayItem<size_t>*>(l_ptr);
+            ArrayItem<size_t>* l_element = static_cast<ArrayItem<size_t>*>(start);
             // we know every element which follows is a Array Element
             // we also know that toAdd is already a array!
             rapidjson::Value l_value;
@@ -678,13 +675,13 @@ namespace jimdb
                 {
                     case INT:
                         {
-                            l_value = static_cast<ArrayItem<long long>*>(l_ptr)->getData();
+                            l_value = reinterpret_cast<ArrayItem<long long>*>(l_element)->getData();
                             toAdd.PushBack(l_value, aloc);
                         }
                         break;
                     case BOOL:
                         {
-                            l_value = static_cast<ArrayItem<bool>*>(l_ptr)->getData();
+                            l_value = reinterpret_cast<ArrayItem<bool>*>(l_element)->getData();
                             toAdd.PushBack(l_value, aloc);
                         }
                         break;
@@ -693,19 +690,25 @@ namespace jimdb
                     case ARRAY:
                         {
                             l_value.SetArray();
-                            l_ptr = buildArray(static_cast<ArrayType*>(l_ptr)->size(), l_ptr, l_value, aloc);
+
+                            //void* l_start = reinterpret_cast<char*>(l_element) + l_element->getNext();
+                            //void* temp = buildArray(reinterpret_cast<ArrayType*>(l_element)->size(), l_start, l_value, aloc);
+                            l_element = static_cast < ArrayItem<size_t>*>( buildArray(reinterpret_cast<ArrayItem<size_t>*>(l_element)->getData(),
+                                        reinterpret_cast<char*>(l_element) + l_element->getNext(),
+                                        l_value, aloc));
+
                             toAdd.PushBack(l_value, aloc);
                         }
                         break;
                     case DOUBLE:
                         {
-                            l_value = static_cast<ArrayItem<double>*>(l_ptr)->getData();
+                            l_value = reinterpret_cast<ArrayItem<double>*>(l_element)->getData();
                             toAdd.PushBack(l_value, aloc);
                         }
                         break;
                     case STRING:
                         {
-                            auto l_data = static_cast<ArrayItemString*>(l_ptr)->getString();
+                            auto l_data = reinterpret_cast<ArrayItemString*>(l_element)->getString();
                             l_value.SetString(l_data->c_str(), l_data->length(), aloc);
                             toAdd.PushBack(l_value, aloc);
                         }
@@ -716,9 +719,9 @@ namespace jimdb
                         break;
                 }
                 //update the lptr to the next element;
-                l_ptr = static_cast<char*>(l_ptr) + static_cast<ArrayItem<size_t>*>(l_ptr)->getNext();
+                l_element = reinterpret_cast<ArrayItem<size_t>*>(reinterpret_cast<char*>(l_element) + l_element->getNext());
             }
-            return l_ptr;
+            return l_element;
         }
     }
 }
