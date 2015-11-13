@@ -3,7 +3,7 @@
 #include "../index/pageindex.h"
 #include "../datatype/arrayitem.h"
 #include "../common/configuration.h"
-#include "../network/MessageFactory.h"
+#include "../network/messagefactory.h"
 #include "../assert.h"
 
 namespace jimdb

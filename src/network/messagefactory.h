@@ -63,5 +63,3 @@ namespace jimdb
         };
     }
 }
-
-#include "message.hpp"

@@ -25,10 +25,10 @@
 #include "../datatype/headermetadata.h"
 #include "../index/objectindex.h"
 #include "../datatype/arrayitem.h"
-#include "../network/MessageFactory.h"
+#include "../network/messagefactory.h"
 #include "../meta/metaindex.h"
 #include <rapidjson/stringbuffer.h>
-#include <rapidjson/PrettyWriter.h>
+#include <rapidjson/prettywriter.h>
 #include "../datatype/arrayitemstring.h"
 #include "../datatype/arraytype.h"
 

@@ -19,7 +19,7 @@
 ############################################################################
 **/
 
-#include "MessageFactory.h"
+#include "messagefactory.h"
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
