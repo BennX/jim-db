@@ -41,7 +41,8 @@ namespace jimdb
             @author Benjamin Meyer
             @date 28.10.2015 15:40
             */
-            size_t checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& val);
+            size_t checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& val,
+                                    std::shared_ptr<std::vector<size_t>> hashes);
 
             /**
             \brief calculates the size of the array with overhead
@@ -50,7 +51,8 @@ namespace jimdb
             @author Benjamin Meyer
             @date 28.10.2015 16:29
             */
-            size_t checkSizeArray(const rapidjson::GenericValue<rapidjson::UTF8<>>& val);
+            size_t checkSizeArray(const rapidjson::GenericValue<rapidjson::UTF8<>>& val,
+                                  std::shared_ptr<std::vector<size_t>> hashes);
 
             //vector of inner object ids which get insterted
             // while creation of the meta

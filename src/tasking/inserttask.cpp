@@ -26,11 +26,11 @@ namespace jimdb
                 return;
             }
 
+            auto l_hashes = std::make_shared<std::vector<size_t>>();
             //insert it to meta and get the size of the data in memory
-            auto l_objSize = checkSizeAndMeta(it->name.GetString(), it->value);
+            auto l_objSize = checkSizeAndMeta(it->name.GetString(), it->value, l_hashes);
 
             //Now estimate the next page which has space for l_objSize
-
             // get a page which could fit the obj and which is not locked
             // if its locked we create a new page
             // so there are depending on the machine up to cpu max
@@ -55,7 +55,8 @@ namespace jimdb
             m_client->send(factory.generateResultInsert(oid));
         }
 
-        size_t InsertTask::checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& value)
+        size_t InsertTask::checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& value,
+                                            std::shared_ptr<std::vector<size_t>> hashes)
         {
             auto& meta = meta::MetaIndex::getInstance();
             auto l_metaExsist = meta.contains(common::FNVHash()(name));
@@ -89,7 +90,7 @@ namespace jimdb
                                 newMeta->push_back({ it->name.GetString(), meta::OBJECT });
                             //now check if the obj already exsist
                             //else create it or skip
-                            l_objSize += checkSizeAndMeta(it->name.GetString(), it->value);
+                            l_objSize += checkSizeAndMeta(it->name.GetString(), it->value, hashes);
                             //also add the size of the new obj to it
                         }
                         break;
@@ -99,7 +100,7 @@ namespace jimdb
                             if (!l_metaExsist)
                                 newMeta->push_back({ it->name.GetString(), meta::ARRAY });
 
-                            l_objSize += checkSizeArray(it->value);
+                            l_objSize += checkSizeArray(it->value, hashes);
                         }
                         break;
 
@@ -145,7 +146,8 @@ namespace jimdb
         }
 
 
-        size_t InsertTask::checkSizeArray(const rapidjson::GenericValue<rapidjson::UTF8<>>& val)
+        size_t InsertTask::checkSizeArray(const rapidjson::GenericValue<rapidjson::UTF8<>>& val,
+                                          std::shared_ptr<std::vector<size_t>> hashes)
         {
             //we got a array over here
             size_t l_arrSize = 0;
@@ -164,17 +166,50 @@ namespace jimdb
                         break;
 
                     case rapidjson::kObjectType:
-                        //so now we got an object without a name!!!
+                        {
+                            //so now we got an object without a name!!!
 
-                        //now check if the obj already exsist
-                        //else create it or skip
-                        //TODO FIX THIS!!! NEED A ID HERE
-                        l_arrSize += checkSizeAndMeta("", *it);
-                        //also add the size of the new obj to it
+                            //now check if the obj already exsist
+                            //else create it or skip
+                            //TODO FIX THIS!!! NEED A ID HERE
+                            l_arrSize += checkSizeAndMeta("", *it, hashes);
+                            //also add the size of the new obj to it
+
+                            std::stringstream ss;
+                            for (auto objIt = (*it).MemberBegin(); objIt != (*it).MemberEnd(); ++objIt)
+                            {
+                                //TODO Fix the numbers
+                                ss << objIt->name.GetString();
+                                switch (objIt->value.GetType())
+                                {
+                                    case rapidjson::kNullType:
+                                        break;
+                                    case rapidjson::kFalseType:
+                                    case rapidjson::kTrueType:
+                                        ss << 31;
+                                        break;
+                                    case rapidjson::kObjectType:
+                                        ss << 743;
+                                        break;
+                                    case rapidjson::kArrayType:
+                                        ss << 1303;
+                                        break;
+                                    case rapidjson::kStringType:
+                                        ss << 3037;
+                                        break;
+                                    case rapidjson::kNumberType:
+                                        ss << 5167;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            hashes->push_back(common::FNVHash()(ss.str()));
+                        }
                         break;
 
                     case rapidjson::kArrayType:
-                        l_arrSize += checkSizeArray(*it);
+                        l_arrSize += checkSizeArray(*it, hashes);
                         break;
 
                     case rapidjson::kStringType:
