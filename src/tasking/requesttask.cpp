@@ -39,6 +39,12 @@ namespace jimdb
             if (!m_client->hasData())
                 return;
             auto message = m_client->getData();
+            if(message == nullptr)
+            {
+                LOG_WARN << "failed recv after handshake.";
+                return;
+            }
+
             //check the json
             auto& doc = (*message)();
             if(doc.HasParseError())
@@ -77,11 +83,11 @@ namespace jimdb
                 return;
             }
 
-			if (doc["type"].GetString() == std::string("find"))
-			{
-				TaskQueue::getInstance().push_pack(std::make_shared<FindTask>(m_client, message));
-				return;
-			}
+            if (doc["type"].GetString() == std::string("find"))
+            {
+                TaskQueue::getInstance().push_pack(std::make_shared<FindTask>(m_client, message));
+                return;
+            }
 
             //todo do something with the request
         }

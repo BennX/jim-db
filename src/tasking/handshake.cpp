@@ -21,9 +21,18 @@ namespace jimdb
                 m_client->close(); //close the soc
                 return; //return on failur
             }
-            auto mes = m_client->getData();
+            auto l_message = m_client->getData();
+
+            auto& l_doc = (*l_message)();
+
+            if (l_doc.GetParseError() != rapidjson::kParseErrorNone)
+            {
+                LOG_WARN << "handshake Failed";
+                return;
+            }
+
             //check if handshaje is valid
-            if (std::string("hi") == mes->operator()()["data"].GetString())
+            if (std::string("hi") == l_doc["data"].GetString())
                 ;
             else
             {
@@ -32,6 +41,7 @@ namespace jimdb
                 return; //return on failur
             }
             //if handshake is valid do something
+            LOG_DEBUG << "handshake Successfull";
             TaskQueue::getInstance().push_pack(std::make_shared<RequestTask>(m_client));
         }
     }

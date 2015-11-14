@@ -318,12 +318,14 @@ namespace jimdb
                     l_ret = l_freePtr;//safe the spot
                     break;
                 }
+
                 if(l_freePtr->getFree() == size)
                 {
                     //if it exactly fit we also take the spot
                     l_ret = l_freePtr;
                     break;
                 }
+
                 if (l_freePtr->getNext() != 0)
                 {
                     //else it does not fit and we need to go to the next
@@ -487,7 +489,7 @@ namespace jimdb
         void* Page::findHeaderPosition(bool aloc)
         {
             //we cant fit it
-            if (sizeof(HeaderMetaData) >= m_headerSpace)
+            if (sizeof(HeaderMetaData) > m_headerSpace)
                 return nullptr;
             //now get the next free slot which could fit it
             FreeType* l_prev = nullptr;
@@ -502,12 +504,14 @@ namespace jimdb
                     l_ret = l_freePtr;//safe the spot
                     break;
                 }
+
                 if (l_freePtr->getFree() == sizeof(HeaderMetaData))
                 {
                     //if it exactly fit we also take the spot
                     l_ret = l_freePtr;
                     break;
                 }
+
                 if (l_freePtr->getNext() != 0)
                 {
                     //else it does not fit and we need to go to the next
@@ -555,15 +559,18 @@ namespace jimdb
                     //check if we had the head if so update it
                     if (l_prev == nullptr)
                     {
-                        m_headerFree = new(reinterpret_cast<char*>(l_ret) + sizeof(HeaderMetaData)) FreeType(l_ret->getFree()
-                                - sizeof(HeaderMetaData));
-                        *m_freepos = dist(m_body, m_free);
-                        m_headerFree->setNext(dist(m_free, l_ret) + l_next);
+                        //new freetype at that position with size - headermetadata
+                        m_headerFree = new(reinterpret_cast<char*>(l_ret) + sizeof(HeaderMetaData))
+                        FreeType(l_ret->getFree() - sizeof(HeaderMetaData));
+
+                        *m_headerFreePos = dist(m_header, m_headerFree);
+                        if(l_next != 0)
+                            m_headerFree->setNext(dist(m_headerFree, l_ret) + l_next);
                     }
                     else
                     {
-                        auto l_newF = new(reinterpret_cast<char*>(l_ret) + sizeof(HeaderMetaData)) FreeType(l_ret->getFree()
-                                - sizeof(HeaderMetaData));
+                        auto l_newF = new(reinterpret_cast<char*>(l_ret) + sizeof(HeaderMetaData))
+                        FreeType(l_ret->getFree() - sizeof(HeaderMetaData));
                         //next is relativ to the l_ret and of that the next soo...
                         l_newF->setNext(dist(l_newF, l_ret) + l_next);
                         //update the prev

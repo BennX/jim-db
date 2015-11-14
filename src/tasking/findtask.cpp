@@ -41,7 +41,7 @@ namespace jimdb
             auto l_page = index::PageIndex::getInstance()[l_meta.m_page];
             //get/create the object
             auto l_obj = l_page->getJSONObject(l_meta.m_pos);
-			LOG_DEBUG << *l_obj;
+			m_client->send(l_obj);
         }
     }
 }
