@@ -37,11 +37,6 @@ of memory and allow to querry them.
 #include <vector>
 #include "network/asioserver.h"
 
-#ifdef JIMDB_WINDOWS
-BOOL WINAPI ConsoleHandler(DWORD CEvent);
-#endif
-
-
 //forward declare
 class ASIOServer;
 
@@ -125,14 +120,6 @@ int main(int argc, char* argv[])
     LOG_INFO << cfg; //print out the config
     //after this the logger can be used as regular!
 
-    //setup the console handle:
-#ifdef JIMDB_WINDOWS
-    if (SetConsoleCtrlHandler(
-                static_cast<PHANDLER_ROUTINE>(ConsoleHandler), TRUE) == FALSE)
-    {
-        LOG_WARN << "Unable to install console handler!";
-    }
-#endif
     auto& tasks = jimdb::tasking::TaskQueue::getInstance();
     //set up the max number of tasks
     tasks.setMaxSize(cfg[jimdb::common::MAX_TASKS].GetInt());
@@ -161,16 +148,3 @@ int main(int argc, char* argv[])
         tcpServer->accept(true); //call accept blocking
     }
 }
-
-#ifdef JIMDB_WINDOWS
-BOOL WINAPI ConsoleHandler(DWORD CEvent)
-{
-    switch (CEvent)
-    {
-        case CTRL_CLOSE_EVENT:
-            MessageBox(nullptr,
-                       "Closing JIMDB!", "CEvent", MB_OK);
-    }
-    return true;
-}
-#endif

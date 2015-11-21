@@ -42,7 +42,7 @@ if conf.env["buildtype"] == "release" :
     conf.env.AppendUnique(CPPDEFINES     = ["NDEBUG", "BOOST_UBLAS_NDEBUG", "JIMDB_NDEBUG"])
     conf.env.AppendUnique(CPPFLAGS       = ["/O2", "/EHsc"]) # also add unwind mechanic
 elif conf.env["buildtype"] == "debug" :
-    conf.env.AppendUnique(LINKFLAGS   = ["/od"]) 
+    conf.env.AppendUnique(LINKFLAGS   = ["/od"])
     conf.env.AppendUnique(CPPFLAGS    = ["/Od"])
 
 # set library for linking & copying
@@ -60,7 +60,9 @@ elif conf.env["buildtype"] == "debug" :
 # Windows Version options see http://msdn.microsoft.com/en-us/library/aa383745%28v=vs.85%29.aspx
 # Warning https://msdn.microsoft.com/de-de/library/6sehtctf.aspx
 # Version list https://msdn.microsoft.com/de-de/library/windows/desktop/aa383745(v=vs.85).aspx
-if conf.env["winversion"] == "win8.1" :
+if conf.env["winversion"] == "win10" :
+    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0A00"])
+elif conf.env["winversion"] == "win8.1" :
     conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0603"])
 elif conf.env["winversion"] == "win8" :
     conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0602"])
