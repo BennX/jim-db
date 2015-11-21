@@ -22,6 +22,7 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <cstdint>
 #include <rapidjson/document.h>
 namespace jimdb
 {
@@ -59,7 +60,7 @@ namespace jimdb
             @author Benjamin Meyer
             @date 01.11.2015 09:42
             */
-            std::shared_ptr<std::string> generateResultInsert(const size_t& oid);
+            std::shared_ptr<std::string> generateResultInsert(const uint64_t& oid);
         };
     }
 }

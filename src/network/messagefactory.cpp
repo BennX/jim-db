@@ -55,7 +55,7 @@ namespace jimdb
             return nullptr;
         }
 
-        std::shared_ptr<std::string> MessageFactory::generateResultInsert(const size_t& oid)
+        std::shared_ptr<std::string> MessageFactory::generateResultInsert(const uint64_t& oid)
         {
             rapidjson::Document doc;
             doc.SetObject();
