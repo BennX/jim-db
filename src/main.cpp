@@ -30,12 +30,10 @@ of memory and allow to querry them.
 */
 #include "log/logger.h"
 #include <thread>
-#include <list>
 #include "common/configuration.h"
 #include "tasking/taskqueue.h"
 #include "common/cmdargs.h"
 #include "thread/worker.h"
-#pragma comment(lib,"user32.lib")
 #include <vector>
 #include "network/asioserver.h"
 
