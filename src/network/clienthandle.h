@@ -20,7 +20,6 @@
 **/
 
 #pragma once
-#include <WinSock2.h>
 #include <ostream>
 #include<memory>
 #include "iclient.h"

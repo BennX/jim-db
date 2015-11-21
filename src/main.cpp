@@ -28,7 +28,6 @@ of memory and allow to querry them.
 \author Benjamin Meyer
 \date DATE
 */
-#include "network/tcpserver.h"
 #include "log/logger.h"
 #include <thread>
 #include <list>
