@@ -43,7 +43,7 @@ def CreateEnvironment( notparallelbuild = [] ) :
     vars.Add(ListVariable("withoutlibrary", "skipping library builds / downloads", "", ["json", "bstar"]))
 
     if platform.system().lower() == "windows" :
-        vars.Add(EnumVariable("winversion", "value of the Windows version", "win7", allowed_values=("win7", "srv2008", "vista", "srv2003sp1", "xpsp2", "srv2003", "xp", "w2000"), ignorecase=True))
+        vars.Add(EnumVariable("winversion", "value of the Windows version", "win8.1", allowed_values=("win8.1", ""win8", ""win7", "srv2008", "vista", "srv2003sp1", "xpsp2", "srv2003", "xp", "w2000"), ignorecase=True))
 
     # parallel build options
     SetOption( "num_jobs", multiprocessing.cpu_count() )
