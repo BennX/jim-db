@@ -38,7 +38,9 @@ of memory and allow to querry them.
 #include "thread/worker.h"
 #pragma comment(lib,"user32.lib")
 #include <vector>
+#include "network/asioserver.h"
 
+class ASIOServer;
 //forward declare
 BOOL WINAPI ConsoleHandler(DWORD CEvent);
 
@@ -119,8 +121,9 @@ int main(int argc, char* argv[])
     //set up the max number of tasks
     tasks.setMaxSize(cfg[jimdb::common::MAX_TASKS].GetInt());
 
-    std::shared_ptr<jimdb::network::IServer> tcpServer = std::make_shared<jimdb::network::TCPServer>(tasks);
-    tcpServer->start();
+	std::shared_ptr<jimdb::network::IServer> tcpServer = std::make_shared<jimdb::network::ASIOServer>();
+    //std::shared_ptr<jimdb::network::IServer> tcpServer = std::make_shared<jimdb::network::TCPServer>(tasks);
+    //tcpServer->start();
     //start the workers
     auto threads = cfg[jimdb::common::THREADS].GetInt();
     //if the config value is 0 take hardware conc.

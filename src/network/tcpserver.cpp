@@ -67,8 +67,8 @@ namespace jimdb
             // Create a SOCKET for the server to listen for client connections
             //create socket to listen for clients
             m_listensocket = INVALID_SOCKET;
-            m_listensocket = socket(result->ai_family, result->ai_socktype,
-                                    result->ai_protocol);
+            m_listensocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+
             if (m_listensocket == INVALID_SOCKET)
             {
                 LOG_ERROR << "Error at listensock socket(): " << WSAGetLastError();
@@ -130,9 +130,7 @@ namespace jimdb
             // Accept a client socket
             struct sockaddr their_addr; //stored address
             int sin_size = sizeof their_addr;
-            ClientSocket = ::accept(m_listensocket,
-                                    &their_addr,
-                                    &sin_size);
+            ClientSocket = ::accept(m_listensocket, &their_addr, &sin_size);
             if (ClientSocket == INVALID_SOCKET)
             {
                 LOG_ERROR << "accept failed: " << WSAGetLastError();

@@ -43,7 +43,7 @@ namespace jimdb
             "!=",
             "="
         };
-
+        
         Condition::Condition(const bool& eq, const std::string& name, const std::string& value): m_equal(eq), m_name(name),
             m_value(value) {}
 
