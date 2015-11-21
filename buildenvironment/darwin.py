@@ -31,7 +31,7 @@ import Utilities
 
 
 
-conf.env.Replace(CPPDEFINES  = ["JIMDB_WINDOWS"])
+conf.env.Replace(CPPDEFINES  = ["JIMDB_DARWIN"])
 conf.env.Replace(CPPFLAGS    = ["-std=c++11", "-stdlib=libc++"])
 conf.env.Replace(LINKFLAGS   = ["-stdlib=libc++"])
 
