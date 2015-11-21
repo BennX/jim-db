@@ -43,11 +43,6 @@ namespace jimdb
             return true;
         }
 
-        bool ASIOClienthandle::isConnected() const
-        {
-            return true;
-        }
-
         std::shared_ptr<Message> ASIOClienthandle::getData()
         {
             char size[MESSAGE_SIZE + 1];

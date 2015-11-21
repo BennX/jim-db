@@ -85,12 +85,12 @@ namespace jimdb
                 return true;
             return false;
         }
-		*/
+		
         bool ClientHandle::isConnected() const
         {
             return m_connected;
         }
-		/**
+		
         void ClientHandle::close()
         {
             m_connected = false;

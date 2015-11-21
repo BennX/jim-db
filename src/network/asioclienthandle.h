@@ -31,22 +31,36 @@
 #include <asio.hpp>
 namespace jimdb
 {
-	namespace network
-	{
-		class ASIOClienthandle : public IClient
-		{
-		public:
-			explicit ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket);
-			~ASIOClienthandle();
+    namespace network
+    {
+        class ASIOClienthandle : public IClient
+        {
+        public:
+            explicit ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket);
+            ~ASIOClienthandle();
+            /**
+            \brief sending data to the client
 
-			bool send(std::shared_ptr<std::string> s) override;
-			bool isConnected() const override;
-			std::shared_ptr<Message> getData() override;
+            @param[in] string the message to send
+            @author Benjamin Meyer
+            @date 21.11.2015 18:28
+            */
+            bool send(std::shared_ptr<std::string> s) override;
+            /**
+            \brief get Data with a async call
+            It does get data async for 1 second or throws!
 
-		private:
-			std::shared_ptr<asio::ip::tcp::socket> m_socket;
-			template<typename AllowTime> void await_operation(AllowTime const& deadline_or_duration);
-		};
-	}
+            @throw error if nothing got recv or timeout
+            @return a Message object of the data that got received
+            @author Benjamin Meyer
+            @date 21.11.2015 18:26
+            */
+            std::shared_ptr<Message> getData() override;
+
+        private:
+            std::shared_ptr<asio::ip::tcp::socket> m_socket;
+            template<typename AllowTime> void await_operation(AllowTime const& deadline_or_duration);
+        };
+    }
 }
 #include "asioclienthandle.hpp"

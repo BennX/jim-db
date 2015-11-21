@@ -50,7 +50,6 @@ namespace jimdb
             */
             bool operator<<(std::shared_ptr<std::string> s);
             bool send(std::shared_ptr<std::string> s) override;
-            bool isConnected() const override;
 
             /**
             \brief Get data from client

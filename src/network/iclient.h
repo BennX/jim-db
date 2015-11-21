@@ -40,7 +40,6 @@ namespace jimdb
             @date 21.11.2015 18:28
             */
             virtual bool send(std::shared_ptr<std::string> s) = 0;
-            virtual bool isConnected() const = 0;
 
             /**
             \brief get Data with a async call
