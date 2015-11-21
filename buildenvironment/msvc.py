@@ -61,27 +61,27 @@ elif conf.env["buildtype"] == "debug" :
 # Warning https://msdn.microsoft.com/de-de/library/6sehtctf.aspx
 # Version list https://msdn.microsoft.com/de-de/library/windows/desktop/aa383745(v=vs.85).aspx
 if conf.env["winversion"] == "win10" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0A00"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0A00","_WIN32_WINNT=0x0A00"])
 elif conf.env["winversion"] == "win8.1" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0603"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0603","_WIN32_WINNT=0x0603"])
 elif conf.env["winversion"] == "win8" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0602"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0602","_WIN32_WINNT=0x0602"])
 elif conf.env["winversion"] == "win7" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0601"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0601","_WIN32_WINNT=0x0601"])
 elif conf.env["winversion"] == "srv2008" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0600"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0600","_WIN32_WINNT=0x0600"])
 elif conf.env["winversion"] == "vista" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0600"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0600","_WIN32_WINNT=0x0600"])
 elif conf.env["winversion"] == "srv2003sp1" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0502"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0502","_WIN32_WINNT=0x0502"])
 elif conf.env["winversion"] == "xpsp2" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0502"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0502","_WIN32_WINNT=0x0502"])
 elif conf.env["winversion"] == "srv2003" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0501"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0501","_WIN32_WINNT=0x0501"])
 elif conf.env["winversion"] == "xp" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0501"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0501","_WIN32_WINNT=0x0501"])
 elif conf.env["winversion"] == "w2000" :
-    conf.env.AppendUnique(CPPDEFINES = ["_WIN32_WINNT=0x0500"])
+    conf.env.AppendUnique(CPPDEFINES = ["WINVER=0x0500","_WIN32_WINNT=0x0500"])
 
 
 
