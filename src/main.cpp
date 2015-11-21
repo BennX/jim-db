@@ -37,13 +37,30 @@ of memory and allow to querry them.
 #include <vector>
 #include "network/asioserver.h"
 
-class ASIOServer;
-//forward declare
 #ifdef JIMDB_WINDOWS
 BOOL WINAPI ConsoleHandler(DWORD CEvent);
 #endif
+
+
+//forward declare
+class ASIOServer;
+
+
+
+/** terminate function, for suppress exspecially on Windows the abnormal termination
+ * message, that is thrown on uncaught exceptions. The handler need not call the
+ * "abort()" function, because this creates the message
+ **/
+void program_terminate() {
+    std::cerr << "error detected which is not handled by the main program" << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+
 int main(int argc, char* argv[])
 {
+    std::set_terminate(program_terminate);
+    
     //logger can be at init using the startup log
     auto& args = jimdb::common::CmdArgs::getInstance();
     args.init(argc, argv);
