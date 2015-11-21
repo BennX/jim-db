@@ -20,6 +20,8 @@
 **/
 
 #pragma once
+#include <iostream>
+#include <exception>
 namespace jimdb
 {
     namespace network
@@ -33,13 +35,18 @@ namespace jimdb
             auto& ioservice = m_socket->get_io_service();
             ioservice.reset();
             {
-                asio::steady_timer tm(ioservice, deadline_or_duration);
-                tm.async_wait([this](std::error_code ec)
-                {
-                    if (ec != error::operation_aborted) m_socket->cancel();
-                });
+                try {
+                    asio::steady_timer tm(ioservice, deadline_or_duration);
+                    tm.async_wait([this](std::error_code ec)
+                    {
+                        if (ec != error::operation_aborted)
+                            m_socket->cancel();
+                    });
 
-                ioservice.poll_one();
+                    ioservice.poll_one();
+                } catch ( const std::exception& e ) {
+                    LOG_EXCAPT << e.what() << " " << m_socket->remote_endpoint().address();
+                }
             }
             ioservice.poll();
         }
