@@ -33,22 +33,20 @@ namespace jimdb
 {
 	namespace network
 	{
-		class ASIOClient : public IClient
+		class ASIOClienthandle : public IClient
 		{
 		public:
-			explicit ASIOClient(std::shared_ptr<asio::ip::tcp::socket> socket);
-			~ASIOClient();
+			explicit ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket);
+			~ASIOClienthandle();
 
 			bool send(std::shared_ptr<std::string> s) override;
-			bool hasData() override;
 			bool isConnected() const override;
 			std::shared_ptr<Message> getData() override;
-			int getSocketID() const override;
-			void close() override;
+
 		private:
 			std::shared_ptr<asio::ip::tcp::socket> m_socket;
 			template<typename AllowTime> void await_operation(AllowTime const& deadline_or_duration);
 		};
 	}
 }
-#include "asioclient.hpp"
+#include "asioclienthandle.hpp"

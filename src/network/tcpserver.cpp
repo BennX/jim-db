@@ -152,7 +152,7 @@ namespace jimdb
             inet_ntop(their_addr.sa_family,
                       get_in_addr(&their_addr), s,
                       sizeof s);
-            LOG_INFO << "TCPServer: got connection from " << s << " ID: " << newCl->getSocketID();
+            LOG_INFO << "TCPServer: got connection from " << s;
             return true;
         }
 

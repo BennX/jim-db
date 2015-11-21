@@ -26,7 +26,7 @@ namespace jimdb
     {
 
         template <typename AllowTime>
-        void ASIOClient::await_operation(AllowTime const& deadline_or_duration)
+        void ASIOClienthandle::await_operation(AllowTime const& deadline_or_duration)
         {
             using namespace asio;
 

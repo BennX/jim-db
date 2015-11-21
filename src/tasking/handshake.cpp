@@ -40,7 +40,8 @@ namespace jimdb
             else
             {
                 LOG_WARN << "handshake Failed";
-                m_client->close(); //close the soc
+				//not needed anymore, socket get closed automatically
+                //m_client->close(); //close the soc
                 return; //return on failur
             }
             //if handshake is valid do something

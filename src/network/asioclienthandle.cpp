@@ -19,23 +19,21 @@
 ############################################################################
 **/
 
-#include "asioclient.h"
+#include "asioclienthandle.h"
 #define MESSAGE_SIZE 8
-#define WAIT_TIME 1000000 // in micoseconds
-#include <future>
 
 namespace jimdb
 {
     namespace network
     {
-        ASIOClient::ASIOClient(std::shared_ptr<asio::ip::tcp::socket> socket) : m_socket(socket) {}
+        ASIOClienthandle::ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket) : m_socket(socket) {}
 
-        ASIOClient::~ASIOClient()
+        ASIOClienthandle::~ASIOClienthandle()
         {
             m_socket->close();// ? needed?
         }
 
-        bool ASIOClient::send(std::shared_ptr<std::string> s)
+        bool ASIOClienthandle::send(std::shared_ptr<std::string> s)
         {
             char length[MESSAGE_SIZE + 1];
             sprintf(length, "%8d", static_cast<int>(s->size()));
@@ -45,33 +43,13 @@ namespace jimdb
             return true;
         }
 
-        bool ASIOClient::hasData()
-        {
-            auto l_start_time = std::chrono::high_resolution_clock::now();
-            long long l_dif = 0;
-            while (l_dif < WAIT_TIME)
-            {
-                if (m_socket->available())
-                {
-                    return true;
-                }
-                l_dif = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() -
-                        l_start_time).count();
-                std::this_thread::sleep_for(std::chrono::microseconds(1));
-            }
-            return false;
-        }
-
-        bool ASIOClient::isConnected() const
+        bool ASIOClienthandle::isConnected() const
         {
             return true;
         }
 
-        std::shared_ptr<Message> ASIOClient::getData()
+        std::shared_ptr<Message> ASIOClienthandle::getData()
         {
-            asio::steady_timer tm(m_socket->get_io_service());
-            tm.wait();
-
             char size[MESSAGE_SIZE + 1];
             asio::async_read(*m_socket, asio::buffer(size, MESSAGE_SIZE), [&](std::error_code ec, size_t bytes_read)
             {
@@ -92,17 +70,5 @@ namespace jimdb
 
             return std::make_shared<Message>(l_buffer);
         }
-
-        int ASIOClient::getSocketID() const
-        {
-            LOG_DEBUG << m_socket->remote_endpoint().address().to_string();
-            return 0;
-        }
-
-        void ASIOClient::close()
-        {
-            m_socket->close();
-        }
-
     }
 }

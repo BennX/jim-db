@@ -21,7 +21,7 @@
 
 
 #include "asioserver.h"
-#include "asioclient.h"
+#include "asioclienthandle.h"
 #include "../tasking/taskqueue.h"
 #include "../tasking/handshake.h"
 
@@ -33,11 +33,8 @@ namespace jimdb
         {
             auto l_sock = std::make_shared<asio::ip::tcp::socket>(m_io_service);
             m_acceptor.accept(*l_sock);
-            auto l_client = std::make_shared<ASIOClient>(l_sock);
-
+            auto l_client = std::make_shared<ASIOClienthandle>(l_sock);
             tasking::TaskQueue::getInstance().push_pack(std::make_shared<tasking::HandshakeTask>(l_client));
-
-            //client.send(std::make_shared<std::string>("asdf"));
             return 0;
         }
 
@@ -46,13 +43,8 @@ namespace jimdb
             return false;
         }
 
-        ASIOServer::ASIOServer() : m_acceptor(m_io_service, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 6060))
-        {
-        }
+        ASIOServer::ASIOServer() : m_acceptor(m_io_service, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 6060)) {}
 
-
-        ASIOServer::~ASIOServer()
-        {
-        }
+        ASIOServer::~ASIOServer() {}
     }
 }

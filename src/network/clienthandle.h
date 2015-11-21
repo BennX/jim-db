@@ -26,7 +26,7 @@
 #include "iclient.h"
 
 //size of the number in front of a message
-#define MESSAGE_SIZE 8 
+#define MESSAGE_SIZE 8
 namespace jimdb
 {
     namespace network
@@ -39,7 +39,7 @@ namespace jimdb
 
         \author Benjamin Meyer
         */
-        class ClientHandle :public IClient
+        class ClientHandle : public IClient
         {
         public:
             explicit ClientHandle(const SOCKET& s, const sockaddr& add);
@@ -50,9 +50,7 @@ namespace jimdb
             */
             bool operator<<(std::shared_ptr<std::string> s);
             bool send(std::shared_ptr<std::string> s) override;
-            bool hasData() override;
             bool isConnected() const override;
-            void close() override;
 
             /**
             \brief Get data from client
@@ -63,11 +61,9 @@ namespace jimdb
             */
             std::shared_ptr<Message> getData() override;
 
-            int getSocketID() const override;
-
         private:
             SOCKET m_sock;
-			sockaddr m_addr;
+            sockaddr m_addr;
             std::string m_user;
             std::string m_address;
             bool m_connected;

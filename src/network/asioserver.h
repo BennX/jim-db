@@ -43,7 +43,6 @@ namespace jimdb
 		private:
 			asio::io_service m_io_service;
 			asio::ip::tcp::acceptor m_acceptor;
-
 		};
 	}
 }

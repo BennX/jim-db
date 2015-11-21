@@ -32,13 +32,26 @@ namespace jimdb
         public:
             virtual ~IClient() { }
 
+            /**
+            \brief sending data to the client
+
+            @param[in] string the message to send
+            @author Benjamin Meyer
+            @date 21.11.2015 18:28
+            */
             virtual bool send(std::shared_ptr<std::string> s) = 0;
-            virtual bool hasData() = 0;
             virtual bool isConnected() const = 0;
 
+            /**
+            \brief get Data with a async call
+            It does get data async for 1 second or throws!
+
+            @throw error if nothing got recv or timeout
+            @return a Message object of the data that got received
+            @author Benjamin Meyer
+            @date 21.11.2015 18:26
+            */
             virtual std::shared_ptr<Message> getData() = 0;
-            virtual int getSocketID() const = 0;
-            virtual void close() = 0;
         };
     }
 }

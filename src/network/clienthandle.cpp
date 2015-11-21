@@ -67,7 +67,7 @@ namespace jimdb
             //LOG_DEBUG << "Sent: " << *s;
             return true;
         }
-
+		/**
         bool ClientHandle::hasData()
         {
             fd_set temp;
@@ -85,18 +85,18 @@ namespace jimdb
                 return true;
             return false;
         }
-
+		*/
         bool ClientHandle::isConnected() const
         {
             return m_connected;
         }
-
+		/**
         void ClientHandle::close()
         {
             m_connected = false;
             closesocket(m_sock);
         }
-
+		*/
         std::shared_ptr<Message> ClientHandle::getData()
         {
             int n;
@@ -121,12 +121,12 @@ namespace jimdb
             //return ne Message
             return std::make_shared<Message>(buffer);
         }
-
+		/**
         int ClientHandle::getSocketID() const
         {
             return m_sock;
         }
-
+		*/
         bool ClientHandle::checkRetValRecv(const int& n)
         {
             if (n == SOCKET_ERROR)
