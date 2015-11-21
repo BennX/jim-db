@@ -20,7 +20,14 @@
 // **/
 #pragma once
 #include "iclient.h"
+
 #define ASIO_STANDALONE
+#define ASIO_HAS_STD_CHRONO
+#define ASIO_HAS_STD_ARRAY
+#define ASIO_HAS_STD_TYPE_TRAITS
+#define ASIO_HAS_CSTDINT
+#define ASIO_HAS_STD_SHARED_PTR
+#define ASIO_HAS_STD_ADDRESSOF
 #include <asio.hpp>
 namespace jimdb
 {
@@ -40,6 +47,8 @@ namespace jimdb
 			void close() override;
 		private:
 			std::shared_ptr<asio::ip::tcp::socket> m_socket;
+			template<typename AllowTime> void await_operation(AllowTime const& deadline_or_duration);
 		};
 	}
 }
+#include "asioclient.hpp"

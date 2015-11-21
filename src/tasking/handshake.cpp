@@ -15,13 +15,16 @@ namespace jimdb
         {
             //sending a handshake HI and wait 1s to return a hi as shake
             m_client->send(network::MessageFactory().generate(network::HANDSHAKE));
-            if (!m_client->hasData())
+			std::shared_ptr<network::Message> l_message = nullptr;
+            try
             {
-                LOG_WARN << "handshake Failed";
-                m_client->close(); //close the soc
-                return; //return on failur
+                l_message = m_client->getData();
             }
-            auto l_message = m_client->getData();
+            catch( std::runtime_error& e)
+            {
+				LOG_ERROR << "client timed out: " << e.what();
+                return;
+            }
 
             auto& l_doc = (*l_message)();
 

@@ -36,7 +36,7 @@ namespace jimdb
             virtual bool hasData() = 0;
             virtual bool isConnected() const = 0;
 
-            virtual std::shared_ptr<Message>  getData() = 0;
+            virtual std::shared_ptr<Message> getData() = 0;
             virtual int getSocketID() const = 0;
             virtual void close() = 0;
         };

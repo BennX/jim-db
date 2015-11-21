@@ -19,7 +19,6 @@
 ############################################################################
 **/
 
-
 #include "requesttask.h"
 #include "../log/logger.h"
 #include "taskqueue.h"
@@ -34,19 +33,25 @@ namespace jimdb
 
         void RequestTask::operator()()
         {
-            //this tasks follows right after a handshake so we should have data
-            //to be safe check for data
-            if (!m_client->hasData())
+            std::shared_ptr<network::Message> l_message;
+            try
+            {
+                l_message = m_client->getData();
+            }
+            catch(std::runtime_error& e)
+            {
+                LOG_ERROR << "client timed out: " << e.what();
                 return;
-            auto message = m_client->getData();
-            if(message == nullptr)
+            }
+
+            if(l_message == nullptr)
             {
                 LOG_WARN << "failed recv after handshake.";
                 return;
             }
 
             //check the json
-            auto& doc = (*message)();
+            auto& doc = (*l_message)();
             if(doc.HasParseError())
             {
                 LOG_WARN << "invalid JSON";
@@ -60,6 +65,7 @@ namespace jimdb
                 //TODO send info back
                 return;
             }
+
             if (!doc["type"].IsString() || !doc["data"].IsObject())
             {
                 LOG_WARN << "invalid JSON";
@@ -69,7 +75,7 @@ namespace jimdb
 
             if (doc["type"].GetString() == std::string("insert"))
             {
-                TaskQueue::getInstance().push_pack(std::make_shared<InsertTask>(m_client, message));
+                TaskQueue::getInstance().push_pack(std::make_shared<InsertTask>(m_client, l_message));
                 return;
             }
 
@@ -85,11 +91,9 @@ namespace jimdb
 
             if (doc["type"].GetString() == std::string("find"))
             {
-                TaskQueue::getInstance().push_pack(std::make_shared<FindTask>(m_client, message));
+                TaskQueue::getInstance().push_pack(std::make_shared<FindTask>(m_client, l_message));
                 return;
             }
-
-            //todo do something with the request
         }
     }
 }

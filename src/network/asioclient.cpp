@@ -69,12 +69,26 @@ namespace jimdb
 
         std::shared_ptr<Message> ASIOClient::getData()
         {
+            asio::steady_timer tm(m_socket->get_io_service());
+            tm.wait();
+
             char size[MESSAGE_SIZE + 1];
-            asio::read(*m_socket, asio::buffer(size, MESSAGE_SIZE));
+            asio::async_read(*m_socket, asio::buffer(size, MESSAGE_SIZE), [&](std::error_code ec, size_t bytes_read)
+            {
+                if (ec) throw std::runtime_error(ec.message());
+            });
+            //wait for the task to finish
+            await_operation(std::chrono::seconds(1));
+
             auto l_size = atoi(size);
             auto l_buffer = new char[l_size + 1];
             l_buffer[l_size] = '\0';
-            asio::read(*m_socket, asio::buffer(l_buffer, l_size));
+            asio::async_read(*m_socket, asio::buffer(l_buffer, l_size), [&](std::error_code ec, size_t bytes_read)
+            {
+                if (ec) throw std::runtime_error(ec.message());
+            });
+            //wait for the task to finish
+            await_operation(std::chrono::seconds(1));
 
             return std::make_shared<Message>(l_buffer);
         }
@@ -89,5 +103,6 @@ namespace jimdb
         {
             m_socket->close();
         }
+
     }
 }
