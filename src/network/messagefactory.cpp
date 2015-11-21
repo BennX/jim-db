@@ -64,7 +64,8 @@ namespace jimdb
 
             rapidjson::GenericValue<rapidjson::UTF8<>> data;
             data.SetObject();
-            data.AddMember("oid__", oid, doc.GetAllocator());
+			rapidjson::Value l_oid(oid);
+            data.AddMember("oid__", l_oid, doc.GetAllocator());
             doc.AddMember("data", data, doc.GetAllocator());
 
             // Convert JSON document to string
