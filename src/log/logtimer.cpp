@@ -29,7 +29,7 @@ namespace jimdb
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>
                             (end - m_start).count();
-            *this << " [" << duration << "µs]";
+            *this << " [" << duration << "\u039Cs]";
         }
     }
 }
