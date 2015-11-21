@@ -38,9 +38,10 @@ namespace jimdb
                 {
                     if (ec != error::operation_aborted) m_socket->cancel();
                 });
-                ioservice.run_one();
+
+                ioservice.poll_one();
             }
-            ioservice.run();
+            ioservice.poll();
         }
     }
 }

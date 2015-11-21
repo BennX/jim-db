@@ -30,7 +30,7 @@ namespace jimdb
 
         ASIOClienthandle::~ASIOClienthandle()
         {
-            m_socket->close();// ? needed?
+            m_socket->close();
         }
 
         bool ASIOClienthandle::send(std::shared_ptr<std::string> s)
@@ -39,7 +39,11 @@ namespace jimdb
             sprintf(length, "%8d", static_cast<int>(s->size()));
             auto l_message = std::string(length);
             l_message += *s;
-            asio::write(*m_socket, asio::buffer(l_message), asio::transfer_all());
+            asio::async_write(*m_socket, asio::buffer(l_message, l_message.size()), [&](std::error_code ec, size_t bytes_read)
+            {
+                if (ec) throw std::runtime_error(ec.message());
+            });
+            await_operation(std::chrono::seconds(1));
             return true;
         }
 
@@ -49,6 +53,7 @@ namespace jimdb
             asio::async_read(*m_socket, asio::buffer(size, MESSAGE_SIZE), [&](std::error_code ec, size_t bytes_read)
             {
                 if (ec) throw std::runtime_error(ec.message());
+				return;
             });
             //wait for the task to finish
             await_operation(std::chrono::seconds(1));
@@ -59,6 +64,7 @@ namespace jimdb
             asio::async_read(*m_socket, asio::buffer(l_buffer, l_size), [&](std::error_code ec, size_t bytes_read)
             {
                 if (ec) throw std::runtime_error(ec.message());
+				return;
             });
             //wait for the task to finish
             await_operation(std::chrono::seconds(1));

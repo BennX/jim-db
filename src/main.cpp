@@ -28,7 +28,6 @@ of memory and allow to querry them.
 \author Benjamin Meyer
 \date DATE
 */
-#include "network/tcpserver.h"
 #include "log/logger.h"
 #include <thread>
 #include <list>
@@ -42,8 +41,9 @@ of memory and allow to querry them.
 
 class ASIOServer;
 //forward declare
+#ifdef JIMDB_WINDOWS
 BOOL WINAPI ConsoleHandler(DWORD CEvent);
-
+#endif
 int main(int argc, char* argv[])
 {
     //logger can be at init using the startup log
@@ -111,17 +111,18 @@ int main(int argc, char* argv[])
     //after this the logger can be used as regular!
 
     //setup the console handle:
+#ifdef JIMDB_WINDOWS
     if (SetConsoleCtrlHandler(
                 static_cast<PHANDLER_ROUTINE>(ConsoleHandler), TRUE) == FALSE)
     {
         LOG_WARN << "Unable to install console handler!";
     }
-
+#endif
     auto& tasks = jimdb::tasking::TaskQueue::getInstance();
     //set up the max number of tasks
     tasks.setMaxSize(cfg[jimdb::common::MAX_TASKS].GetInt());
 
-	std::shared_ptr<jimdb::network::IServer> tcpServer = std::make_shared<jimdb::network::ASIOServer>();
+    std::shared_ptr<jimdb::network::IServer> tcpServer = std::make_shared<jimdb::network::ASIOServer>();
     //std::shared_ptr<jimdb::network::IServer> tcpServer = std::make_shared<jimdb::network::TCPServer>(tasks);
     //tcpServer->start();
     //start the workers
@@ -146,7 +147,7 @@ int main(int argc, char* argv[])
     }
 }
 
-
+#ifdef JIMDB_WINDOWS
 BOOL WINAPI ConsoleHandler(DWORD CEvent)
 {
     switch (CEvent)
@@ -157,3 +158,4 @@ BOOL WINAPI ConsoleHandler(DWORD CEvent)
     }
     return true;
 }
+#endif

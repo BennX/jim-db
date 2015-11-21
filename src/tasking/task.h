@@ -20,7 +20,8 @@
 **/
 
 #pragma once
-#include "../network/clienthandle.h"
+#include "../network/iclient.h"
+
 namespace jimdb
 {
     namespace tasking

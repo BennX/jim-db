@@ -15,22 +15,30 @@ namespace jimdb
         {
             //sending a handshake HI and wait 1s to return a hi as shake
             m_client->send(network::MessageFactory().generate(network::HANDSHAKE));
-			std::shared_ptr<network::Message> l_message = nullptr;
+            std::shared_ptr<network::Message> l_message = nullptr;
             try
             {
                 l_message = m_client->getData();
             }
             catch( std::runtime_error& e)
             {
-				LOG_ERROR << "client timed out: " << e.what();
+                LOG_ERROR << "client timed out: " << e.what();
+                return;
+            }
+
+            try
+            {
+                auto& l_doc = (*l_message)();
+            }
+            catch (std::runtime_error& e)
+            {
+                LOG_ERROR << "Parsing throwed: " << e.what();
                 return;
             }
 
             auto& l_doc = (*l_message)();
-
             if (l_doc.GetParseError() != rapidjson::kParseErrorNone)
             {
-                LOG_WARN << "handshake Failed";
                 return;
             }
 
@@ -40,7 +48,7 @@ namespace jimdb
             else
             {
                 LOG_WARN << "handshake Failed";
-				//not needed anymore, socket get closed automatically
+                //not needed anymore, socket get closed automatically
                 //m_client->close(); //close the soc
                 return; //return on failur
             }
