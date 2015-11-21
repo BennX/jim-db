@@ -33,7 +33,7 @@ import Utilities
 
 conf.env.Replace(CPPDEFINES  = ["JIMDB_DARWIN"])
 conf.env.Replace(CPPFLAGS    = ["-std=c++1y"])
-conf.env.Replace(LINKFLAGS   = ["-stdlib=libc++"])
+conf.env.Replace(LINKFLAGS   = [""])
 
 if conf.env["buildtype"] == "release" :
     conf.env.AppendUnique(CPPDEFINES     = ["NDEBUG", "BOOST_UBLAS_NDEBUG", "JIMDB_NDEBUG"])
