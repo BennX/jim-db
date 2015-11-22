@@ -52,7 +52,7 @@ namespace jimdb
             char size[MESSAGE_SIZE + 1];
             asio::async_read(*m_socket, asio::buffer(size, MESSAGE_SIZE), [&](std::error_code ec, size_t bytes_read)
             {
-                if (ec) throw std::runtime_error(ec.message());
+                //if (ec) throw std::runtime_error(ec.message());
 				return;
             });
             //wait for the task to finish
@@ -63,8 +63,8 @@ namespace jimdb
             l_buffer[l_size] = '\0';
             asio::async_read(*m_socket, asio::buffer(l_buffer, l_size), [&](std::error_code ec, size_t bytes_read)
             {
-                if (ec) throw std::runtime_error(ec.message());
-				return;
+                //if (ec) throw std::runtime_error(ec.message());
+                return;
             });
             //wait for the task to finish
             await_operation(std::chrono::seconds(1));

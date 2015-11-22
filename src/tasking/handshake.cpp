@@ -15,16 +15,9 @@ namespace jimdb
         {
             //sending a handshake HI and wait 1s to return a hi as shake
             m_client->send(network::MessageFactory().generate(network::HANDSHAKE));
-            std::shared_ptr<network::Message> l_message = nullptr;
-            try
-            {
-                l_message = m_client->getData();
-            }
-            catch( std::runtime_error& e)
-            {
-                LOG_ERROR << "client timed out: " << e.what();
+            std::shared_ptr<network::Message> l_message = m_client->getData();
+            if (l_message == nullptr)
                 return;
-            }
 
             try
             {
@@ -43,9 +36,7 @@ namespace jimdb
             }
 
             //check if handshaje is valid
-            if (std::string("hi") == l_doc["data"].GetString())
-                ;
-            else
+            if (std::string("hi") != l_doc["data"].GetString())
             {
                 LOG_WARN << "handshake Failed";
                 //not needed anymore, socket get closed automatically
