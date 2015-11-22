@@ -26,7 +26,7 @@ namespace jimdb
 {
     namespace network
     {
-        ASIOClienthandle::ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket) : m_socket(socket) {}
+        ASIOClienthandle::ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket) : m_socket(socket), m_cancled(false) {}
 
         ASIOClienthandle::~ASIOClienthandle()
         {
@@ -41,10 +41,9 @@ namespace jimdb
             l_message += *s;
             asio::async_write(*m_socket, asio::buffer(l_message, l_message.size()), [&](std::error_code ec, size_t bytes_read)
             {
-                if (ec) throw std::runtime_error(ec.message());
+                //if (ec) throw std::runtime_error(ec.message());
             });
-            await_operation(std::chrono::seconds(1));
-            return true;
+            return !await_operation(std::chrono::seconds(1));
         }
 
         std::shared_ptr<Message> ASIOClienthandle::getData()
@@ -52,22 +51,32 @@ namespace jimdb
             char size[MESSAGE_SIZE + 1];
             asio::async_read(*m_socket, asio::buffer(size, MESSAGE_SIZE), [&](std::error_code ec, size_t bytes_read)
             {
-                //if (ec) throw std::runtime_error(ec.message());
-				return;
+                if (ec)
+                    return nullptr;
             });
             //wait for the task to finish
-            await_operation(std::chrono::seconds(1));
+            if(await_operation(std::chrono::seconds(1)))
+            {
+                return nullptr;
+            }
 
-            auto l_size = atoi(size);
+            std::stringstream ss;
+            ss << size;
+            int l_size;
+            ss >> l_size;
+            //auto l_size = atoi(size);
             auto l_buffer = new char[l_size + 1];
             l_buffer[l_size] = '\0';
             asio::async_read(*m_socket, asio::buffer(l_buffer, l_size), [&](std::error_code ec, size_t bytes_read)
             {
-                //if (ec) throw std::runtime_error(ec.message());
-                return;
+                if (ec)
+                    return nullptr;
             });
             //wait for the task to finish
-            await_operation(std::chrono::seconds(1));
+            if(await_operation(std::chrono::seconds(1)))
+            {
+                return nullptr;
+            }
 
             return std::make_shared<Message>(l_buffer);
         }

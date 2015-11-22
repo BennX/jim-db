@@ -28,27 +28,35 @@ namespace jimdb
     {
 
         template <typename AllowTime>
-        void ASIOClienthandle::await_operation(AllowTime const& deadline_or_duration)
+        bool ASIOClienthandle::await_operation(AllowTime const& deadline_or_duration)
         {
             using namespace asio;
+			m_cancled = false;
 
             auto& ioservice = m_socket->get_io_service();
             ioservice.reset();
             {
-                try {
+                try
+                {
                     asio::steady_timer tm(ioservice, deadline_or_duration);
                     tm.async_wait([this](std::error_code ec)
                     {
                         if (ec != error::operation_aborted)
+                        {
                             m_socket->cancel();
+							m_cancled = true;
+                        }
                     });
 
                     ioservice.poll_one();
-                } catch ( const std::exception& e ) {
+                }
+                catch ( const std::exception& e )
+                {
                     LOG_EXCAPT << e.what() << " " << m_socket->remote_endpoint().address();
                 }
             }
             ioservice.poll();
+            return m_cancled;
         }
     }
 }

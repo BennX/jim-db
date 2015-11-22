@@ -33,16 +33,7 @@ namespace jimdb
 
         void RequestTask::operator()()
         {
-            std::shared_ptr<network::Message> l_message;
-            try
-            {
-                l_message = m_client->getData();
-            }
-            catch(std::runtime_error& e)
-            {
-                LOG_ERROR << "client timed out: " << e.what();
-                return;
-            }
+	        auto l_message = m_client->getData();
 
             if(l_message == nullptr)
             {
