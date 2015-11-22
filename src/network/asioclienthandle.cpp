@@ -26,7 +26,8 @@ namespace jimdb
 {
     namespace network
     {
-        ASIOClienthandle::ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket) : m_socket(socket), m_cancled(false) {}
+        ASIOClienthandle::ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket) : m_socket(socket),
+            m_cancled(false) {}
 
         ASIOClienthandle::~ASIOClienthandle()
         {
@@ -35,19 +36,19 @@ namespace jimdb
 
         bool ASIOClienthandle::send(std::shared_ptr<std::string> s)
         {
+            if (s == nullptr)
+                return false;
             char length[MESSAGE_SIZE + 1];
             sprintf(length, "%8d", static_cast<int>(s->size()));
             auto l_message = std::string(length);
             l_message += *s;
-            asio::async_write(*m_socket, asio::buffer(l_message, l_message.size()), [&](std::error_code ec, size_t bytes_read)
-            {
-                //if (ec) throw std::runtime_error(ec.message());
-            });
+            asio::async_write(*m_socket, asio::buffer(l_message, l_message.size()), [&](std::error_code ec, size_t bytes_read) {});
             return !await_operation(std::chrono::seconds(1));
         }
 
         std::shared_ptr<Message> ASIOClienthandle::getData()
         {
+
             char size[MESSAGE_SIZE + 1];
             asio::async_read(*m_socket, asio::buffer(size, MESSAGE_SIZE), [&](std::error_code ec, size_t bytes_read)
             {
@@ -79,18 +80,12 @@ namespace jimdb
             }
             // hier ist Ende der Methode, d.h. hier wird entweder beim Cancel der Nullpointer geliefert oder eben die Daten
 
-            std::stringstream ss;
-            ss << size;
-            int l_size;
-            ss >> l_size;
-            //auto l_size = atoi(size);
+            size[MESSAGE_SIZE] = '\0';
+            l_size = atoi(size);
+
             auto l_buffer = new char[l_size + 1];
             l_buffer[l_size] = '\0';
-            asio::async_read(*m_socket, asio::buffer(l_buffer, l_size), [&](std::error_code ec, size_t bytes_read)
-            {
-                if (ec)
-                    return nullptr;
-            });
+            asio::async_read(*m_socket, asio::buffer(l_buffer, l_size), [&](std::error_code ec, size_t bytes_read) {});
             //wait for the task to finish
             if(await_operation(std::chrono::seconds(1)))
             {
