@@ -68,7 +68,6 @@ namespace jimdb
                 return; //return on failur
             }
             //if handshake is valid do something
-            LOG_DEBUG << "handshake Successfull";
             TaskQueue::getInstance().push_pack(std::make_shared<RequestTask>(m_client));
         }
     }

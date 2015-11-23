@@ -21,6 +21,7 @@
 
 #include "asioclienthandle.h"
 #define MESSAGE_SIZE 8
+#include <thread>
 
 namespace jimdb
 {
@@ -31,13 +32,11 @@ namespace jimdb
 
         ASIOClienthandle::~ASIOClienthandle()
         {
-            LOG_DEBUG << "client closed";
             m_socket->close();
         }
 
         bool ASIOClienthandle::send(std::shared_ptr<std::string> s)
         {
-            LOG_DEBUG << "sending: " << *s;
             if (s == nullptr)
                 return false;
             char length[MESSAGE_SIZE + 1];
@@ -48,7 +47,7 @@ namespace jimdb
             //this doesnt like string itself getting xstring issues so go for the cstring.
             asio::async_write(*m_socket, asio::buffer(l_message.c_str(), l_message.size()), [&](std::error_code ec,
             size_t bytes_read) {});
-            await_operation(std::chrono::seconds(2));
+            await_operation(std::chrono::seconds(1));
             return true;
         }
 
@@ -64,17 +63,14 @@ namespace jimdb
             ss << l_buffer;
             ss >> l_size;
 
-            LOG_DEBUG << "receive size: " << l_size << " : " << ss.str();
             delete[] l_buffer;
 
             if (l_size == 0)
                 return nullptr;
 
             l_buffer = read(l_size);
-            LOG_DEBUG << "received: " << l_buffer;
             if (l_buffer != nullptr)
             {
-                LOG_DEBUG << "received: " << l_buffer;
                 return std::make_shared<Message>(l_buffer);
             }
             return nullptr;
@@ -91,7 +87,6 @@ namespace jimdb
             });
             //wait for the task to finish
             await_operation(std::chrono::seconds(1));
-
             return l_buffer;
         }
     }

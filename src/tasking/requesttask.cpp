@@ -33,7 +33,6 @@ namespace jimdb
 
         void RequestTask::operator()()
         {
-            LOG_DEBUG << "request";
             auto l_message = m_client->getData();
 
             if(l_message == nullptr)
