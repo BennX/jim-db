@@ -31,11 +31,13 @@ namespace jimdb
 
         ASIOClienthandle::~ASIOClienthandle()
         {
+            LOG_DEBUG << "client closed";
             m_socket->close();
         }
 
         bool ASIOClienthandle::send(std::shared_ptr<std::string> s)
         {
+            LOG_DEBUG << "sending: " << *s;
             if (s == nullptr)
                 return false;
             char length[MESSAGE_SIZE + 1];
@@ -62,30 +64,35 @@ namespace jimdb
             ss << l_buffer;
             ss >> l_size;
 
+            LOG_DEBUG << "receive size: " << l_size << " : " << ss.str();
             delete[] l_buffer;
 
             if (l_size == 0)
                 return nullptr;
 
             l_buffer = read(l_size);
-            if(l_buffer != nullptr)
+            LOG_DEBUG << "received: " << l_buffer;
+            if (l_buffer != nullptr)
+            {
+                LOG_DEBUG << "received: " << l_buffer;
                 return std::make_shared<Message>(l_buffer);
+            }
             return nullptr;
         }
 
         char* ASIOClienthandle::read(const size_t& count)
         {
             auto l_buffer = new char[count + 1];
-            l_buffer[count] = '\0';
-
+			l_buffer[count] = '\0';
             asio::async_read(*m_socket, asio::buffer(l_buffer, count), [&](std::error_code ec, size_t bytes_read)
             {
                 if (ec)
                     LOG_ERROR << ec.message();
             });
             //wait for the task to finish
-            await_operation(std::chrono::microseconds(2));
-            return l_buffer ;
+            await_operation(std::chrono::seconds(1));
+
+            return l_buffer;
         }
     }
 }

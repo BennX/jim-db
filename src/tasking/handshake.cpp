@@ -36,8 +36,11 @@ namespace jimdb
             //sending a handshake HI and wait 1s to return a hi as shake
             m_client->send(network::MessageFactory().generate(network::HANDSHAKE));
             std::shared_ptr<network::Message> l_message = m_client->getData();
-            if (l_message == nullptr)
-                return;
+			if (l_message == nullptr)
+			{
+				LOG_DEBUG << "message is null";
+				return;
+			}
 
             try
             {
@@ -52,6 +55,7 @@ namespace jimdb
             auto& l_doc = (*l_message)();
             if (l_doc.GetParseError() != rapidjson::kParseErrorNone)
             {
+				LOG_DEBUG << "paser error";
                 return;
             }
 
@@ -64,7 +68,7 @@ namespace jimdb
                 return; //return on failur
             }
             //if handshake is valid do something
-            //LOG_DEBUG << "handshake Successfull";
+            LOG_DEBUG << "handshake Successfull";
             TaskQueue::getInstance().push_pack(std::make_shared<RequestTask>(m_client));
         }
     }
