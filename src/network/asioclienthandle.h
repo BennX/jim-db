@@ -62,6 +62,9 @@ namespace jimdb
             //@return if it was canceld
             template<typename AllowTime> bool await_operation(AllowTime const& deadline_or_duration);
 			volatile bool m_cancled;
+
+			char* read(const size_t& count);
+
 		};
     }
 }

@@ -41,6 +41,7 @@ namespace jimdb
                     asio::steady_timer tm(ioservice, deadline_or_duration);
                     tm.async_wait([this](std::error_code ec)
                     {
+						//timer was not cancled so it run out
                         if (ec != error::operation_aborted)
                         {
                             m_socket->cancel();
