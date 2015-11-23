@@ -45,7 +45,7 @@ namespace jimdb
                         m_socket->cancel();
                     }
                 });
-                ioservice.run_one();
+                ioservice.poll_one();
             }
             ioservice.run();
         }

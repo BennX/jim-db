@@ -43,7 +43,8 @@ namespace jimdb
             return false;
         }
 
-        ASIOServer::ASIOServer() : m_io_service() ,m_acceptor(m_io_service, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 6060)) {}
+        ASIOServer::ASIOServer() : m_io_service() , m_acceptor(m_io_service, asio::ip::tcp::endpoint(asio::ip::tcp::v4(),
+                    6060)) {}
 
         ASIOServer::~ASIOServer() {}
     }
