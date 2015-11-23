@@ -45,12 +45,8 @@ namespace jimdb
 
             //this doesnt like string itself getting xstring issues so go for the cstring.
             asio::async_write(*m_socket, asio::buffer(l_message.c_str(), l_message.size()), [&](std::error_code ec,
-                              size_t bytes_read)
-            {
-                //if (ec)
-                //    return false;
-            });
-            await_operation(std::chrono::seconds(1));
+            size_t bytes_read) {});
+            await_operation(std::chrono::seconds(2));
             return true;
         }
 
@@ -68,6 +64,9 @@ namespace jimdb
 
             delete[] l_buffer;
 
+            if (l_size == 0)
+                return nullptr;
+
             l_buffer = read(l_size);
             if(l_buffer != nullptr)
                 return std::make_shared<Message>(l_buffer);
@@ -81,34 +80,12 @@ namespace jimdb
 
             asio::async_read(*m_socket, asio::buffer(l_buffer, count), [&](std::error_code ec, size_t bytes_read)
             {
-                if (!ec)
-                {
-
-                    // hier muss der kram ab std::stringstream hin, denn hier läuft es synchron (innerhalb der asynchronen struktur)
-                    // alternativ geht dann auch hier auch ein Abbruch, wenn alles fertig gelesen wurde und dann im Finish-Callback
-                    // die Verarbeitung übernehmen
-                    // Nebenläufigkeit:
-                    // getData
-                    // |
-                    // |----> async handshake
-                    // |            |
-                    // wait return  |
-                    // |            |-------> async message
-                    // |            |             |
-                    // |            |             |
-                    // finish<------|<-------------
-                    //
-                    // das Wait muss die Zeit für den Timeout abwarten und dann direkt returnen und eben alle asynchronen Teile
-                    // mit beenden, das finish muss so lange warten, bis beide async Läufe beendet wurden
-                    //return l_buffer;
-                }
+                if (ec)
+                    LOG_ERROR << ec.message();
             });
             //wait for the task to finish
-            if (await_operation(std::chrono::seconds(1)))
-            {
-                return nullptr;
-            }
-            return l_buffer;
+            await_operation(std::chrono::microseconds(2));
+            return l_buffer ;
         }
     }
 }

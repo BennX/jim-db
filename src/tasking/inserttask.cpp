@@ -53,6 +53,7 @@ namespace jimdb
             //generate answer and return it.
             network::MessageFactory factory;
             m_client->send(factory.generateResultInsert(oid));
+			LOG_DEBUG << oid;
         }
 
         size_t InsertTask::checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& value,
