@@ -24,6 +24,7 @@
 #include "asioclienthandle.h"
 #include "../tasking/taskqueue.h"
 #include "../tasking/handshake.h"
+#include "../common/configuration.h"
 
 namespace jimdb
 {
@@ -32,7 +33,7 @@ namespace jimdb
         int ASIOServer::accept(const bool& blocking)
         {
             auto l_sock = std::make_shared<asio::ip::tcp::socket>(m_io_service);
-            m_acceptor.accept(*l_sock);
+            m_acceptor->accept(*l_sock);
             auto l_client = std::make_shared<ASIOClienthandle>(l_sock);
             tasking::TaskQueue::getInstance().push_pack(std::make_shared<tasking::HandshakeTask>(l_client));
             return 0;
@@ -43,8 +44,23 @@ namespace jimdb
             return false;
         }
 
-        ASIOServer::ASIOServer() : m_io_service() , m_acceptor(m_io_service, asio::ip::tcp::endpoint(asio::ip::tcp::v4(),
-                    6060)) {}
+        ASIOServer::ASIOServer() : m_io_service() , m_acceptor(nullptr)
+        {
+            using namespace common;
+            auto& cfg = Configuration::getInstance();
+            try
+            {
+                std::string ip = cfg[IP].GetString() == std::string("localhost") ? "127.0.0.1" : cfg[IP].GetString();
+                int port = cfg[PORT].GetInt();
+                asio::ip::tcp::endpoint ep(asio::ip::address::from_string(ip), port);
+                m_acceptor = std::make_shared<asio::ip::tcp::acceptor>(m_io_service, ep);
+                LOG_INFO << "Server Listen on: " << ep.address().to_string() << ":" << ep.port();
+            }
+            catch(std::runtime_error& e)
+            {
+                LOG_ERROR << e.what();
+            }
+        }
 
         ASIOServer::~ASIOServer() {}
     }

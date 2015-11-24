@@ -38,7 +38,7 @@ of memory and allow to querry them.
 #include "network/asioserver.h"
 
 //forward declare
-class ASIOServer;
+//class ASIOServer;
 
 
 

@@ -37,10 +37,11 @@ namespace jimdb
             LOG_LEVEL = 0,
             LOG_FILE,
             THREADS,
+			IP,
             PORT,
             MAX_TASKS,
-			PAGE_HEADER,
-			PAGE_BODY,
+            PAGE_HEADER,
+            PAGE_BODY,
             SIZE_OF_ENUM,
         };
 

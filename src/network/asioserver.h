@@ -42,7 +42,7 @@ namespace jimdb
 			bool start() override;
 		private:
 			asio::io_service m_io_service;
-			asio::ip::tcp::acceptor m_acceptor;
+			std::shared_ptr<asio::ip::tcp::acceptor> m_acceptor;
 		};
 	}
 }

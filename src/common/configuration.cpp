@@ -40,10 +40,11 @@ namespace jimdb
             "log_level",
             "log_file",
             "thread",
+            "ip",
             "port",
             "max_tasks",
-			"page_header",
-			"page_body"
+            "page_header",
+            "page_body",
         };
 
         //check if valid numer must be the size of the enum!
@@ -89,17 +90,17 @@ namespace jimdb
             check(LOG_FILE);
             check(LOG_LEVEL);
             check(THREADS); //0 means take system default
+			check(IP);
             check(PORT);
             check(MAX_TASKS);
-			check(PAGE_HEADER);
-			check(PAGE_BODY);
-
+            check(PAGE_HEADER);
+            check(PAGE_BODY);
             return true;
         }
 
-		rapidjson::Value& Configuration::operator[](const ConfigValues& key)
+        rapidjson::Value& Configuration::operator[](const ConfigValues& key)
         {
-			return m_values[ConfigValuesMap::get(key)];
+            return m_values[ConfigValuesMap::get(key)];
         }
 
         std::string Configuration::generate() const
@@ -120,19 +121,22 @@ namespace jimdb
             name.SetString(ConfigValuesMap::get(THREADS), alloc);
             doc.AddMember(name, 0, doc.GetAllocator());
 
+			name.SetString(ConfigValuesMap::get(IP), alloc);
+			doc.AddMember(name, "localhost", doc.GetAllocator());
+
             name.SetString(ConfigValuesMap::get(PORT), alloc);
-            doc.AddMember(name, "6060", doc.GetAllocator());
+            doc.AddMember(name, 6060, doc.GetAllocator());
 
             name.SetString(ConfigValuesMap::get(MAX_TASKS), alloc);
             doc.AddMember(name, 1024, doc.GetAllocator());
 
-			//1Kib
-			name.SetString(ConfigValuesMap::get(PAGE_HEADER), alloc);
-			doc.AddMember(name, 1024, doc.GetAllocator());
+            //1Kib
+            name.SetString(ConfigValuesMap::get(PAGE_HEADER), alloc);
+            doc.AddMember(name, 1024, doc.GetAllocator());
 
-			//16Kib
-			name.SetString(ConfigValuesMap::get(PAGE_BODY), alloc);
-			doc.AddMember(name, 16384, doc.GetAllocator());
+            //16Kib
+            name.SetString(ConfigValuesMap::get(PAGE_BODY), alloc);
+            doc.AddMember(name, 16384, doc.GetAllocator());
 
             rapidjson::StringBuffer strbuf;
             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);
