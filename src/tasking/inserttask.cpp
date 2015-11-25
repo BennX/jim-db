@@ -14,6 +14,12 @@ namespace jimdb
                                const std::shared_ptr<network::Message> m) : Task(client), m_msg(m) {}
 
 
+        /**
+        * Really importand to understand!!
+        * The find of the Pageindex also automatically LOCKS THE PAGE!!
+        * The insert of the Page automatically unlocks at the end!
+        * There is no possibilty to use lockguards here so this meight be tricky!
+        */
         void InsertTask::operator()()
         {
             //insert into page

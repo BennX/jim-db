@@ -48,9 +48,8 @@ namespace jimdb
         {
             rapidjson::Document doc;
             doc.SetObject();
-            rapidjson::Value l_value("hi");
-            rapidjson::Value l_name(MessageTypeMap::get(HANDSHAKE), doc.GetAllocator());
-            doc.AddMember(l_name, l_value, doc.GetAllocator());
+            doc.AddMember(rapidjson::Value(MessageTypeMap::get(HANDSHAKE), doc.GetAllocator()), rapidjson::Value("hi"),
+                          doc.GetAllocator());
             return generate(HANDSHAKE, doc);
         }
 
@@ -58,9 +57,8 @@ namespace jimdb
         {
             rapidjson::Document doc;
             doc.SetObject();
-            rapidjson::Value l_value(what.c_str(), doc.GetAllocator());
-            rapidjson::Value l_name(MessageTypeMap::get(WHAT), doc.GetAllocator());
-            doc.AddMember(l_name, l_value, doc.GetAllocator());
+            doc.AddMember(rapidjson::Value(MessageTypeMap::get(WHAT), doc.GetAllocator()), rapidjson::Value(what.c_str(),
+                          doc.GetAllocator()), doc.GetAllocator());
             return generate(ERROR, doc);
         }
 
@@ -68,8 +66,7 @@ namespace jimdb
         {
             rapidjson::Document doc;
             doc.SetObject();
-            rapidjson::Value l_oid(oid);
-            doc.AddMember("oid__", l_oid, doc.GetAllocator());
+            doc.AddMember("oid__", rapidjson::Value(oid), doc.GetAllocator());
             return generate(RESULT, doc);
         }
 
@@ -78,8 +75,7 @@ namespace jimdb
         {
             rapidjson::Document doc;
             doc.SetObject();
-            rapidjson::Value l_type(MessageTypeMap::get(t), doc.GetAllocator());
-            doc.AddMember("type", l_type, doc.GetAllocator());
+            doc.AddMember("type", rapidjson::Value(MessageTypeMap::get(t), doc.GetAllocator()), doc.GetAllocator());
             doc.AddMember("data", data, doc.GetAllocator());
             return toString(doc);
         }

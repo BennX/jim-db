@@ -24,6 +24,7 @@
 #include "../datatype/freetype.h"
 #include <rapidjson/document.h>
 #include "../thread/rwlock.h"
+#include "../thread/spinlock.h"
 
 namespace jimdb
 {
@@ -93,7 +94,7 @@ namespace jimdb
             static long long m_objCount;
             //const voidptr to memory to static cast as we like
             char* const m_header;
-			char* const m_body;
+            char* const m_body;
 
             /**############################################
             * private methods for body
@@ -129,6 +130,9 @@ namespace jimdb
             //lock for getFree and so on
             tasking::RWLock m_rwLock;
 
+            //lock for the free to be sure there is noone else checking right now
+            tasking::SpinLock m_spin;
+
             /**############################################
              * private methods for object
              * ############################################*/
@@ -144,7 +148,8 @@ namespace jimdb
             @author Benjamin Meyer
             @date 29.10.2015 12:12
             */
-            std::pair<void*, void*> insertObject(const rapidjson::GenericValue<rapidjson::UTF8<>>& value, BaseType<size_t>* const l_last);
+            std::pair<void*, void*> insertObject(const rapidjson::GenericValue<rapidjson::UTF8<>>& value,
+                                                 BaseType<size_t>* const l_last);
 
             /**
             \brief returns a ptr to the slot where it can fit
@@ -213,7 +218,8 @@ namespace jimdb
             */
             void* buildObject(const size_t& hash, void* start, rapidjson::Value& toAdd, rapidjson::MemoryPoolAllocator<>& aloc);
 
-            void* buildArray(const long long& elemCount,void* start,rapidjson::Value& toAdd, rapidjson::MemoryPoolAllocator<>& aloc);
+            void* buildArray(const long long& elemCount, void* start, rapidjson::Value& toAdd,
+                             rapidjson::MemoryPoolAllocator<>& aloc);
         };
     }
 }

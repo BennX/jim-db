@@ -93,18 +93,18 @@ namespace jimdb
 
         bool Page::free(const size_t& size)
         {
-            //tasking::RWLockGuard<> lock(m_rwLock, tasking::READ);
-            //find without alocing here!
-            return find(size, false) != nullptr
-                   //do not aloc
-                   && findHeaderPosition(false) != nullptr; //nullptr = false in c++ 11 but be safe her
+			std::lock_guard<tasking::SpinLock> lock(m_spin);
+            if (!m_rwLock && find(size, false) != nullptr
+                    && findHeaderPosition(false) != nullptr)
+            {
+                m_rwLock.writeLock();
+                return true;
+            }
+            return false;
         }
 
         size_t Page::insert(const rapidjson::GenericValue<rapidjson::UTF8<>>& value)
         {
-            //never forget to lock ...
-            tasking::RWLockGuard<> lock(m_rwLock, tasking::WRITE);
-
             //here we know this page has one chunk big enough to fitt the whole object
             //including its overhead! so start inserting it.
 
@@ -120,8 +120,12 @@ namespace jimdb
             //insert the header
             auto meta = insertHeader(m_objCount++, 0, common::FNVHash()(name), l_first);
             //push the obj to obj index
+            if (meta == nullptr)
+                return 0;
             index::ObjectIndex::getInstance().add(meta->getOID(), {m_id, dist(m_header, meta)});
             //done!
+
+            m_rwLock.writeUnlock();
             return meta->getOID();
         }
 
