@@ -31,6 +31,21 @@ namespace jimdb
         enum MessageTypes
         {
             HANDSHAKE,
+            RESULT,
+            ERROR,
+			WHAT,
+            ENUM_SIZE,
+        };
+
+        struct MessageTypeMap
+        {
+            //need the strings for the size
+            static const char* EnumString[];
+
+            /**
+            @return the configValue as const char*
+            */
+            static const char* get(const MessageTypes& e);
         };
 
         /**
@@ -44,16 +59,10 @@ namespace jimdb
         {
         public:
             MessageFactory();
-            std::shared_ptr<std::string> generate(const MessageTypes& t) const;
-            /**
-            \brief generate a result message
+			std::shared_ptr<std::string> handshake();
+			std::shared_ptr<std::string> error(const std::string &what);
 
-            the message contains/wrapps the object added to it as result
-            @author Benjamin Meyer
-            @date 01.11.2015 09:41
-            */
-            std::shared_ptr<std::string> generate(const rapidjson::GenericValue<rapidjson::UTF8<>>& result);
-            /**
+			/**
             \brief generates a result message of an insert
 
             @param[in] oid the object ID which was inserted
@@ -61,6 +70,9 @@ namespace jimdb
             @date 01.11.2015 09:42
             */
             std::shared_ptr<std::string> generateResultInsert(const uint64_t& oid);
-        };
+        private:
+            std::shared_ptr<std::string> generate(const MessageTypes& t, rapidjson::Value& data);
+			std::shared_ptr<std::string> toString(rapidjson::Value& data) const;
+		};
     }
 }

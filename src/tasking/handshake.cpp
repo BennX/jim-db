@@ -34,13 +34,16 @@ namespace jimdb
         void HandshakeTask::operator()()
         {
             //sending a handshake HI and wait 1s to return a hi as shake
-            m_client->send(network::MessageFactory().generate(network::HANDSHAKE));
+            m_client->send(network::MessageFactory().handshake());
             std::shared_ptr<network::Message> l_message = m_client->getData();
-			if (l_message == nullptr)
-			{
-				LOG_DEBUG << "message is null";
-				return;
-			}
+
+            if (l_message == nullptr)
+            {
+                //since we didnt recv we assume that we
+                // cant answer a error message here
+                LOG_DEBUG << "message is null";
+                return;
+            }
 
             try
             {
@@ -48,19 +51,23 @@ namespace jimdb
             }
             catch (std::runtime_error& e)
             {
-                LOG_ERROR << "Parsing throwed: " << e.what();
+                std::string  error = "Handshake parsing error: ";
+                error += e.what();
+                LOG_ERROR << error;
+                m_client->send(network::MessageFactory().error(error));
                 return;
             }
 
             auto& l_doc = (*l_message)();
             if (l_doc.GetParseError() != rapidjson::kParseErrorNone)
             {
-				LOG_DEBUG << "paser error";
+                LOG_ERROR << "Handshake parsing error.";
+                m_client->send(network::MessageFactory().error("Handshake parsing error."));
                 return;
             }
 
             //check if handshaje is valid
-            if (std::string("hi") != l_doc["data"].GetString())
+            if (std::string("hi") != l_doc["data"]["handshake"].GetString())
             {
                 LOG_WARN << "handshake Failed";
                 //not needed anymore, socket get closed automatically

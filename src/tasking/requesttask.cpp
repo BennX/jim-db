@@ -24,6 +24,7 @@
 #include "taskqueue.h"
 #include "inserttask.h"
 #include "findtask.h"
+#include "../network/messagefactory.h"
 
 namespace jimdb
 {
@@ -38,6 +39,7 @@ namespace jimdb
             if(l_message == nullptr)
             {
                 LOG_WARN << "failed recv after handshake.";
+                //no need to answer
                 return;
             }
 
@@ -45,22 +47,22 @@ namespace jimdb
             auto& doc = (*l_message)();
             if(doc.HasParseError())
             {
-                LOG_WARN << "invalid JSON";
-                //TODO send info back
+                LOG_WARN << "Invalid JSON request.";
+                m_client->send(network::MessageFactory().error("Invalid JSON request."));
                 return;
             }
 
             if (doc.FindMember("type") == doc.MemberEnd() || doc.FindMember("data") == doc.MemberEnd())
             {
-                LOG_WARN << "invalid JSON";
-                //TODO send info back
+                LOG_WARN << "Invalid JSON request. Missing type or data member";
+                m_client->send(network::MessageFactory().error("Invalid JSON request. Missing type or data member"));
                 return;
             }
 
             if (!doc["type"].IsString() || !doc["data"].IsObject())
             {
-                LOG_WARN << "invalid JSON";
-                //todo send info back
+                LOG_WARN << "Invalid JSON request. Missing type isString or data isObject.";
+                m_client->send(network::MessageFactory().error("Invalid JSON request. Missing type isString or data isObject."));
                 return;
             }
 
