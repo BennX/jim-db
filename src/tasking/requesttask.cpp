@@ -25,7 +25,7 @@
 #include "inserttask.h"
 #include "findtask.h"
 #include "../network/messagefactory.h"
-
+#include "../common/error.h"
 namespace jimdb
 {
     namespace tasking
@@ -48,21 +48,24 @@ namespace jimdb
             if(doc.HasParseError())
             {
                 LOG_WARN << "Invalid JSON request.";
-                m_client->send(network::MessageFactory().error("Invalid JSON request."));
+                m_client->send(network::MessageFactory().error(
+                                   error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::INVALID_JSON_REQUEST]));
                 return;
             }
 
             if (doc.FindMember("type") == doc.MemberEnd() || doc.FindMember("data") == doc.MemberEnd())
             {
                 LOG_WARN << "Invalid JSON request. Missing type or data member";
-                m_client->send(network::MessageFactory().error("Invalid JSON request. Missing type or data member"));
+                m_client->send(network::MessageFactory().error(
+                                   error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::MISSING_TYPE_OR_DATA_REQUEST]));
                 return;
             }
 
             if (!doc["type"].IsString() || !doc["data"].IsObject())
             {
                 LOG_WARN << "Invalid JSON request. Missing type isString or data isObject.";
-                m_client->send(network::MessageFactory().error("Invalid JSON request. Missing type isString or data isObject."));
+                m_client->send(network::MessageFactory().error(
+                                   error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::TYPE_OR_DATA_WRONG_TYPE_REQUEST]));
                 return;
             }
 

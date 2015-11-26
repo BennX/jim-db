@@ -23,7 +23,7 @@
 #include "taskqueue.h"
 #include "requesttask.h"
 #include "../network/messagefactory.h"
-
+#include "../common/error.h"
 class RequestTask;
 namespace jimdb
 {
@@ -51,10 +51,11 @@ namespace jimdb
             }
             catch (std::runtime_error& e)
             {
-                std::string  error = "Handshake parsing error: ";
+                std::string  error = "parsing error Handshake: ";
                 error += e.what();
                 LOG_ERROR << error;
-                m_client->send(network::MessageFactory().error(error));
+                m_client->send(network::MessageFactory().error(
+                                   error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::PARSEERROR_HANDSHAKE]));
                 return;
             }
 
@@ -62,7 +63,8 @@ namespace jimdb
             if (l_doc.GetParseError() != rapidjson::kParseErrorNone)
             {
                 LOG_ERROR << "Handshake parsing error.";
-                m_client->send(network::MessageFactory().error("Handshake parsing error."));
+                m_client->send(network::MessageFactory().error(
+                                   error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::PARSEERROR_HANDSHAKE]));
                 return;
             }
 

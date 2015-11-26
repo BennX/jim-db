@@ -31,7 +31,7 @@ namespace jimdb
         {
             "handshake",
             "result",
-            "excaption",
+            "error",
             "what"
         };
 
