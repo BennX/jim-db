@@ -19,10 +19,9 @@
 ############################################################################
 
 
-
-# Build environment configuration for Mac OS X. The libraries must be stored within
+# Build environment configuration for Linux. The libraries must be stored within
 # the global system paths or must be set within the environment variables. The env
-# variables are read here and are added to the environment object.
+# variables are read here and are added to the environment object
 #
 # Build is set to C++11 with Clang
 
@@ -31,9 +30,9 @@ import Utilities
 
 
 
-conf.env.Replace(CPPDEFINES  = ["JIMDB_DARWIN"])
-conf.env.Replace(CPPFLAGS    = ["-std=c++1y"])
-conf.env.Replace(LINKFLAGS   = [""])
+conf.env.Replace(CPPDEFINES  = ["JIMDB_POSIX"])
+conf.env.Replace(CPPFLAGS    = ["-std=c++11"])
+conf.env.Replace(LINKFLAGS   = [])
 
 if conf.env["buildtype"] == "release" :
     conf.env.AppendUnique(CPPDEFINES     = ["NDEBUG", "BOOST_UBLAS_NDEBUG", "JIMDB_NDEBUG"])
@@ -43,15 +42,10 @@ elif conf.env["buildtype"] == "debug" :
     conf.env.AppendUnique(CPPFLAGS    = ["-g", "-Wall"])
 
 
-
 # set pathes for compiler & linker
 if not conf.env["withlocallibrary"] :
 
-    if conf.env["ENV"].has_key("DYLD_LIBRARY_PATH") :
-        conf.env.Replace(LIBPATH = conf.env["ENV"]["DYLD_LIBRARY_PATH"].split(os.pathsep))
-        print("Appending custom OSX dynamic library path (DYLD_LIBRARY_PATH)")
-
-    elif conf.env["ENV"].has_key("LD_LIBRARY_PATH") :
+    if conf.env["ENV"].has_key("LD_LIBRARY_PATH") :
         conf.env.Replace(LIBPATH = conf.env["ENV"]["LD_LIBRARY_PATH"].split(os.pathsep))
         print("Appending custom posix dynamic library path (LD_LIBRARY_PATH)")
 

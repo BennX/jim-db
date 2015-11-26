@@ -45,17 +45,6 @@ elif conf.env["buildtype"] == "debug" :
     conf.env.AppendUnique(LINKFLAGS   = ["/od"])
     conf.env.AppendUnique(CPPFLAGS    = ["/Od"])
 
-# set library for linking & copying
-#libraries = {
-#    "lua"            : ["lua"],
-#    "boost"          : ["boost_program_options-mt", "boost_filesystem-mt"]
-#}
-
-#conf.env.AppendUnique(
-#                      LIBS = libraries["lua"] +
-#                      libraries["boost"] +
-#                      )
-
 
 # Windows Version options see http://msdn.microsoft.com/en-us/library/aa383745%28v=vs.85%29.aspx
 # Warning https://msdn.microsoft.com/de-de/library/6sehtctf.aspx
