@@ -22,6 +22,8 @@
 
 #pragma once
 #include "task.h"
+#include "../bench/bench.h"
+
 namespace jimdb
 {
     namespace tasking
@@ -39,6 +41,8 @@ namespace jimdb
         public:
             explicit RequestTask(const std::shared_ptr<network::IClient> client);
             void operator()() override;
+		private:
+			Bench* m_bench;
         };
     }
 }

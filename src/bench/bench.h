@@ -19,47 +19,14 @@
 // ############################################################################
 // **/
 #pragma once
-#include "task.h"
-#include <vector>
-#include "../bench/bench.h"
+#include <chrono>
 
-namespace jimdb
+class Bench
 {
-    namespace tasking
-    {
-        class InsertTask : public Task
-        {
-        public:
-            explicit InsertTask(const std::shared_ptr<network::IClient>& client, const std::shared_ptr<network::Message> m);
-            void operator()() override;
-        private:
-            std::shared_ptr<network::Message> m_msg;
-
-            /**
-            \brief insert a meta and returns the size WITH page overhead
-
-            only insert if the meta does not exsist
-            @author Benjamin Meyer
-            @date 28.10.2015 15:40
-            */
-            size_t checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& val,
-                                    std::shared_ptr<std::vector<size_t>> hashes);
-
-            /**
-            \brief calculates the size of the array with overhead
-
-            Also include inner object with a id
-            @author Benjamin Meyer
-            @date 28.10.2015 16:29
-            */
-            size_t checkSizeArray(const rapidjson::GenericValue<rapidjson::UTF8<>>& val,
-                                  std::shared_ptr<std::vector<size_t>> hashes);
-
-            //vector of inner object ids which get insterted
-            // while creation of the meta
-            std::vector<size_t> m_innerIDs;
-
-			Bench * m_bench;
-        };
-    }
-}
+public:
+	explicit Bench(const int& i);
+	~Bench();
+private:
+	int m_id;
+	std::chrono::time_point<std::chrono::steady_clock> m_cycleStart;
+};

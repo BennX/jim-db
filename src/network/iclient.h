@@ -51,6 +51,8 @@ namespace jimdb
             @date 21.11.2015 18:26
             */
             virtual std::shared_ptr<Message> getData() = 0;
+
+			virtual unsigned long long getID() = 0;
         };
     }
 }

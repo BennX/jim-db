@@ -80,6 +80,9 @@ namespace jimdb
             template <typename T>
             inline LogMessage& operator<<(const T& m);
 
+            template <typename T>
+            inline LogMessage& operator<<(T& m);
+
 
             LogMessage(const LogMessage& other);
             LogMessage(LogMessage&& other);

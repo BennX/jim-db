@@ -5,13 +5,17 @@
 #include "../common/configuration.h"
 #include "../network/messagefactory.h"
 #include "../assert.h"
+#include "../bench/bench.h"
 
 namespace jimdb
 {
     namespace tasking
     {
         InsertTask::InsertTask(const std::shared_ptr<network::IClient>& client,
-                               const std::shared_ptr<network::Message> m) : Task(client), m_msg(m) {}
+                               const std::shared_ptr<network::Message> m) : Task(client), m_msg(m)
+        {
+            m_bench = new Bench(m_client->getID());
+        }
 
 
         /**
@@ -22,6 +26,7 @@ namespace jimdb
         */
         void InsertTask::operator()()
         {
+
             //insert into page
             //we already know that its a valid data and valid document here!
             auto& dat = (*m_msg)()["data"];
@@ -43,7 +48,7 @@ namespace jimdb
             // locked pages
             auto l_page = index::PageIndex::getInstance().find(l_objSize);
 
-            if(l_page == nullptr)
+            if (l_page == nullptr)
             {
                 //if the ptr is still nullptr we need to create a new Page
                 //well does not fit in any page
@@ -56,9 +61,10 @@ namespace jimdb
             //insert the obj to the page
             auto oid = l_page->insert(dat);
 
+            delete m_bench;//stop timing here
+
             //generate answer and return it.
-            network::MessageFactory factory;
-            m_client->send(factory.generateResultInsert(oid));
+            m_client->send(network::MessageFactory().generateResultInsert(oid));
         }
 
         size_t InsertTask::checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& value,

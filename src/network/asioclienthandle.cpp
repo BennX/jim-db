@@ -27,8 +27,12 @@ namespace jimdb
 {
     namespace network
     {
-        ASIOClienthandle::ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket) : m_socket(socket),
-            m_cancled(false) {}
+        unsigned long long ASIOClienthandle::id_counter = 0;
+
+	    unsigned long long ASIOClienthandle::getID() { return m_id; }
+
+	    ASIOClienthandle::ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket) : m_socket(socket),
+            m_cancled(false), m_id(++id_counter) {}
 
         ASIOClienthandle::~ASIOClienthandle()
         {
@@ -79,7 +83,7 @@ namespace jimdb
         char* ASIOClienthandle::read(const size_t& count)
         {
             auto l_buffer = new char[count + 1];
-			l_buffer[count] = '\0';
+            l_buffer[count] = '\0';
             asio::async_read(*m_socket, asio::buffer(l_buffer, count), [&](std::error_code ec, size_t bytes_read)
             {
                 if (ec)

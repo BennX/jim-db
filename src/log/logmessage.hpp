@@ -30,8 +30,15 @@ namespace jimdb
         {
             m_stream << m;
             return *this;
-
         }
+
+        template <typename T>
+        LogMessage& LogMessage::operator<<(T& m)
+        {
+            m_stream << m;
+            return *this;
+        }
+
         template <>
         inline LogMessage& LogMessage::operator<<(const bool& b)
         {

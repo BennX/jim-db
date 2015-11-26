@@ -26,16 +26,24 @@
 #include "findtask.h"
 #include "../network/messagefactory.h"
 #include "../common/error.h"
+#include "../bench/bench.h"
+
 namespace jimdb
 {
     namespace tasking
     {
-        RequestTask::RequestTask(const std::shared_ptr<network::IClient> client) : Task(client) { }
+        RequestTask::RequestTask(const std::shared_ptr<network::IClient> client) : Task(client)
+        {
+            m_bench = new Bench(m_client->getID());
+        }
 
         void RequestTask::operator()()
         {
+			delete m_bench;//stop timing
             auto l_message = m_client->getData();
 
+            //start benchmarking
+            Bench bench(m_client->getID());
             if(l_message == nullptr)
             {
                 LOG_WARN << "failed recv after handshake.";

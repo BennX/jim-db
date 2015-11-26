@@ -36,6 +36,7 @@ of memory and allow to querry them.
 #include "thread/worker.h"
 #include <vector>
 #include "network/asioserver.h"
+#include "bench/bench.h"
 
 //forward declare
 //class ASIOServer;
@@ -46,7 +47,8 @@ of memory and allow to querry them.
  * message, that is thrown on uncaught exceptions. The handler need not call the
  * "abort()" function, because this creates the message
  **/
-void program_terminate() {
+void program_terminate()
+{
     std::cerr << "error detected which is not handled by the main program" << std::endl;
     exit(EXIT_FAILURE);
 }
@@ -54,8 +56,9 @@ void program_terminate() {
 
 int main(int argc, char* argv[])
 {
+
     std::set_terminate(program_terminate);
-    
+
     //logger can be at init using the startup log
     auto& args = jimdb::common::CmdArgs::getInstance();
     args.init(argc, argv);

@@ -29,6 +29,8 @@
 #define ASIO_HAS_STD_SHARED_PTR
 #define ASIO_HAS_STD_ADDRESSOF
 #include <asio.hpp>
+#include "../bench/bench.h"
+
 namespace jimdb
 {
     namespace network
@@ -36,6 +38,7 @@ namespace jimdb
         class ASIOClienthandle : public IClient
         {
         public:
+            unsigned long long getID() override;
             explicit ASIOClienthandle(std::shared_ptr<asio::ip::tcp::socket> socket);
             ~ASIOClienthandle();
             /**
@@ -58,14 +61,15 @@ namespace jimdb
             std::shared_ptr<Message> getData() override;
 
         private:
+            static unsigned long long id_counter;
             std::shared_ptr<asio::ip::tcp::socket> m_socket;
             //@return if it was canceld
             template<typename AllowTime> void await_operation(AllowTime const& deadline_or_duration);
-			volatile bool m_cancled;
+            volatile bool m_cancled;
 
-			char* read(const size_t& count);
-
-		};
+            char* read(const size_t& count);
+            unsigned long long m_id;
+        };
     }
 }
 #include "asioclienthandle.hpp"
