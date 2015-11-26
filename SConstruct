@@ -186,7 +186,7 @@ env.Clean( default, [
     Utilities.GlobRekursiv( os.curdir, [env["OBJSUFFIX"], env["SHOBJSUFFIX"], env["LIBSUFFIX"], ".pyc"] ),
     os.path.join("#", "documentation", "html"),
     os.path.join("#", "documentation", "xml"),
-    os.path.join("#", "build"),
+    #os.path.join("#", "build"),
     "config.log",
     ".sconf_temp"
 ])
