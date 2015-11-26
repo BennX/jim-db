@@ -3,7 +3,6 @@
 ############################################################################
 # LGPL License                                                             #
 #                                                                          #
-# Copyright (c) 2015, Philipp Kraus, <philipp.kraus@tu-clausthal.de>       #
 # This program is free software: you can redistribute it and/or modify     #
 # it under the terms of the GNU Lesser General Public License as           #
 # published by the Free Software Foundation, either version 3 of the       #
@@ -33,7 +32,7 @@ import Utilities
 
 conf.env.Replace(CPPDEFINES  = ["JIMDB_DARWIN"])
 conf.env.Replace(CPPFLAGS    = ["-std=c++1y"])
-conf.env.Replace(LINKFLAGS   = [""])
+conf.env.Replace(LINKFLAGS   = [])
 
 if conf.env["buildtype"] == "release" :
     conf.env.AppendUnique(CPPDEFINES     = ["NDEBUG", "BOOST_UBLAS_NDEBUG", "JIMDB_NDEBUG"])
