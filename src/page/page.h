@@ -90,6 +90,8 @@ namespace jimdb
             */
             std::shared_ptr<std::string> getJSONObject(const long long& headerpos);
 
+            bool deleteObj(const long long& headerpos);
+
         private:
             static long long m_objCount;
             //const voidptr to memory to static cast as we like
@@ -220,6 +222,21 @@ namespace jimdb
 
             void* buildArray(const long long& elemCount, void* start, rapidjson::Value& toAdd,
                              rapidjson::MemoryPoolAllocator<>& aloc);
+
+            /**
+            \brief override all values to the according freetype values
+
+             this never overrides the next pointer to make sure it
+             is still a chain
+             this routine basically overrides the data field
+             of the basetype to 0 so it will be interpreted
+             as a freetype size 0.
+             thats all
+            @return returnt he last element
+            @author Benjamin Meyer
+            @date 30.11.2015 11:26
+            */
+            void* deleteObj(const size_t& hash, void* start);
         };
     }
 }
