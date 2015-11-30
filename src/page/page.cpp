@@ -20,15 +20,16 @@
 **/
 
 #include "page.h"
+
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/prettywriter.h>
+
 #include "../assert.h"
 #include "../meta/metadata.h"
+#include "../meta/metaindex.h"
 #include "../datatype/headermetadata.h"
 #include "../index/objectindex.h"
 #include "../datatype/arrayitem.h"
-#include "../network/messagefactory.h"
-#include "../meta/metaindex.h"
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/prettywriter.h>
 #include "../datatype/arrayitemstring.h"
 #include "../datatype/arraytype.h"
 
@@ -93,7 +94,7 @@ namespace jimdb
 
         bool Page::free(const size_t& size)
         {
-			std::lock_guard<tasking::SpinLock> lock(m_spin);
+            std::lock_guard<tasking::SpinLock> lock(m_spin);
             if (!m_rwLock && find(size, false) != nullptr
                     && findHeaderPosition(false) != nullptr)
             {
@@ -171,6 +172,41 @@ namespace jimdb
             rapidjson::Writer<rapidjson::StringBuffer> writer(strbuf);
             l_obj.Accept(writer);
             return std::make_shared<std::string>(strbuf.GetString());
+        }
+
+        bool Page::deleteObj(const long long& headerpos)
+        {
+            //reading the Page
+            tasking::RWLockGuard<> lock(m_rwLock, tasking::WRITE);
+            auto l_header = reinterpret_cast<HeaderMetaData*>(static_cast<char*>(m_header) + headerpos);
+            auto l_oid = l_header->getOID();
+            //start delete by calculating the start position and passing the hash of the obj name
+            deleteObj(l_header->getObjektType(), static_cast<char*>(m_body) + l_header->getPos());
+
+            //now its delete put the freetype ptr to the start
+            //of the "prepared" deleted object
+            auto l_free = m_free;
+            while (l_free->getNext() == 0)
+                l_free = reinterpret_cast<FreeType*>(reinterpret_cast<char*>(l_free) + l_free->getNext());
+            // now l_Free is the last element;
+            l_free->setNext(dist(l_free, static_cast<char*>(m_body) + l_header->getPos()));
+
+            // Delete header
+            l_free = m_headerFree;
+            while (l_free->getNext() == 0)
+                l_free = reinterpret_cast<FreeType*>(reinterpret_cast<char*>(l_free) + l_free->getNext());
+
+            //now we have the last free element of the header
+            //insert free type with the right size
+            auto l_deletedHeader = new(l_header) FreeType(sizeof(HeaderMetaData));
+            //set the freeType pointer to it
+            l_free->setNext(dist(l_free, l_deletedHeader));
+
+            //delete the obj of the idx
+            index::ObjectIndex::getInstance().erase(l_oid);
+            //do NOT delete the Meta! it is way faster to
+            //insert with meta then without so keep the data
+            return true;
         }
 
 
@@ -733,6 +769,59 @@ namespace jimdb
                 l_element = reinterpret_cast<ArrayItem<size_t>*>(reinterpret_cast<char*>(l_element) + l_element->getNext());
             }
             return l_element;
+        }
+
+
+        void* Page::deleteObj(const size_t& hash, void* start)
+        {
+            //get the meta data
+            auto& l_meta = meta::MetaIndex::getInstance()[hash];
+            auto l_ptr = start;
+            for (auto it = l_meta->begin(); it != l_meta->end(); ++it)
+            {
+                switch(it->type)
+                {
+                    case meta::OBJECT:
+                        {
+                            //for the header
+                            m_freeSpace += sizeof(BaseType<size_t>);
+                            //get the hash befor delete
+                            auto l_hash = static_cast<BaseType<size_t>*>(l_ptr)->getData();
+                            //now overrride the size
+                            static_cast<BaseType<size_t>*>(l_ptr)->setData(0);
+                            //recursive go forward
+                            l_ptr = deleteObj(l_hash, static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext());
+                        }
+                        break;
+                    case meta::ARRAY:
+                        {
+                            //TODO delete this array!
+                        }
+                        break;
+                    case meta::STRING:
+                        {
+                            m_freeSpace += static_cast<FreeType*>(l_ptr)->getFree();
+                            //nothing todo here since string = freetype
+                            l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
+                        }
+                        break;
+                    //in this cases we need todo always the same
+                    case meta::INT:
+                    case meta::DOUBLE:
+                    case meta::BOOL:
+                        {
+                            m_freeSpace += sizeof(BaseType<size_t>);
+                            //set the data to 0 so it is a string size 0
+                            //which is a free type with size sizeof(FreeType)
+                            static_cast<BaseType<size_t>*>(l_ptr)->setData(0);
+                            l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return l_ptr;
         }
     }
 }

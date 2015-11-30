@@ -3,7 +3,6 @@
 ############################################################################
 # LGPL License                                                             #
 #                                                                          #
-# Copyright (c) 2015, Philipp Kraus, <philipp.kraus@tu-clausthal.de>       #
 # This program is free software: you can redistribute it and/or modify     #
 # it under the terms of the GNU Lesser General Public License as           #
 # published by the Free Software Foundation, either version 3 of the       #
@@ -44,17 +43,6 @@ if conf.env["buildtype"] == "release" :
 elif conf.env["buildtype"] == "debug" :
     conf.env.AppendUnique(LINKFLAGS   = ["/od"])
     conf.env.AppendUnique(CPPFLAGS    = ["/Od"])
-
-# set library for linking & copying
-#libraries = {
-#    "lua"            : ["lua"],
-#    "boost"          : ["boost_program_options-mt", "boost_filesystem-mt"]
-#}
-
-#conf.env.AppendUnique(
-#                      LIBS = libraries["lua"] +
-#                      libraries["boost"] +
-#                      )
 
 
 # Windows Version options see http://msdn.microsoft.com/en-us/library/aa383745%28v=vs.85%29.aspx
