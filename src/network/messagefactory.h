@@ -33,7 +33,7 @@ namespace jimdb
             HANDSHAKE,
             RESULT,
             ERROR,
-			WHAT,
+            WHAT,
             ENUM_SIZE,
         };
 
@@ -59,10 +59,10 @@ namespace jimdb
         {
         public:
             MessageFactory();
-			std::shared_ptr<std::string> handshake();
-			std::shared_ptr<std::string> error(const std::string &what);
+            std::shared_ptr<std::string> handshake();
+            std::shared_ptr<std::string> error(const std::string& what);
 
-			/**
+            /**
             \brief generates a result message of an insert
 
             @param[in] oid the object ID which was inserted
@@ -72,7 +72,7 @@ namespace jimdb
             std::shared_ptr<std::string> generateResultInsert(const uint64_t& oid);
         private:
             std::shared_ptr<std::string> generate(const MessageTypes& t, rapidjson::Value& data);
-			std::shared_ptr<std::string> toString(rapidjson::Value& data) const;
-		};
+            std::shared_ptr<std::string> toString(rapidjson::Value& data) const;
+        };
     }
 }
