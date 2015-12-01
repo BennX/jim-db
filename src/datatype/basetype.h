@@ -57,7 +57,7 @@ namespace jimdb
             union DataUnion
             {
                 T data;
-                ::std::ptrdiff_t size;
+                std::ptrdiff_t size;
 
                 DataUnion()
                 {
@@ -67,7 +67,7 @@ namespace jimdb
                 explicit DataUnion(const T& t);
             } m_data;
 
-            long long m_next;
+			std::ptrdiff_t m_next;
         };
 #include "BaseType.hpp"
     }

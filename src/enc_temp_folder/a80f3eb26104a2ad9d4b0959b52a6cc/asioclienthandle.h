@@ -59,28 +59,13 @@ namespace jimdb
 
         private:
             std::shared_ptr<asio::ip::tcp::socket> m_socket;
-
-            /**
-            \brief await operation
-
-            @param[in] time the timeout for example chrono::millies(100)
-            @author Benjamin Meyer
-            @date 01.12.2015 17:49
-            */
+            //@return if it was canceld
             template<typename AllowTime> void await_operation(AllowTime const& deadline_or_duration);
-            volatile bool m_cancled;
+			volatile bool m_cancled;
 
-            /**
-            \brief read into a buffer
+			char* read(const size_t& count);
 
-            @param[in] size_t how much byte to read
-            @return a ptr to the buffer. need to be deleted!
-            @author Benjamin Meyer
-            @date 01.12.2015 17:49
-            */
-            char* read(const size_t& count);
-
-        };
+		};
     }
 }
 #include "asioclienthandle.hpp"
