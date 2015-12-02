@@ -34,8 +34,17 @@ namespace jimdb
         {
             auto l_sock = std::make_shared<asio::ip::tcp::socket>(m_io_service);
             m_acceptor->accept(*l_sock);
+
+            asio::socket_base::reuse_address option(true);
+            l_sock->set_option(option);
+
+            asio::socket_base::linger l_lingerOpt;
+            l_sock->get_option(l_lingerOpt);
+            l_lingerOpt.enabled();
+
             auto l_client = std::make_shared<ASIOClienthandle>(l_sock);
             tasking::TaskQueue::getInstance().push_pack(std::make_shared<tasking::HandshakeTask>(l_client));
+            //LOG_DEBUG << "Client accepted";
             return 0;
         }
 
@@ -61,7 +70,6 @@ namespace jimdb
                 LOG_ERROR << e.what();
             }
         }
-
         ASIOServer::~ASIOServer() {}
     }
 }

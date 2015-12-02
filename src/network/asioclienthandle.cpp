@@ -36,7 +36,9 @@ namespace jimdb
 
         ASIOClienthandle::~ASIOClienthandle()
         {
+			//LOG_INFO << *m_socket;
             m_socket->close();
+			//LOG_INFO << *m_socket;
         }
 
         bool ASIOClienthandle::send(std::shared_ptr<std::string> s)

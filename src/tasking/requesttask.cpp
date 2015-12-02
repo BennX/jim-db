@@ -27,6 +27,7 @@
 #include "../network/messagefactory.h"
 #include "../common/error.h"
 #include "../bench/bench.h"
+#include "../bench/benchmark.h"
 
 namespace jimdb
 {
@@ -98,6 +99,11 @@ namespace jimdb
                 TaskQueue::getInstance().push_pack(std::make_shared<FindTask>(m_client, l_message));
                 return;
             }
+
+			if(doc["type"].GetString() ==std::string("bench"))
+			{
+				LOG_DEBUG << Benchmark::getInstance();
+			}
         }
     }
 }

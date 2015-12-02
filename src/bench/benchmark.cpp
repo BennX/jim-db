@@ -24,8 +24,6 @@ void Benchmark::add(const int& i, const unsigned long long& time)
         m_values[i] = time;
         m_counter++;
     }
-    if(m_counter % 1000 == 0 )
-        LOG_DEBUG << *this;
 }
 
 std::ostream& operator<<(std::ostream& os, Benchmark& obj)
@@ -33,7 +31,10 @@ std::ostream& operator<<(std::ostream& os, Benchmark& obj)
     std::stringstream ss;
     for(auto it = obj.m_values.begin(); it != obj.m_values.end(); ++it)
     {
-        ss << ";" << it->second;
+        ss << it->first << ";" << it->second;
+        //linebreak after 10k
+        if(it->first % 10000 == 0)
+            ss << std::endl;
     }
     obj.m_values.clear();
     LOG_DEBUG << ss.str();
