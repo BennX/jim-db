@@ -63,12 +63,27 @@ namespace jimdb
         private:
             static unsigned long long id_counter;
             std::shared_ptr<asio::ip::tcp::socket> m_socket;
-            //@return if it was canceld
+
+            /**
+            \brief await operation
+
+            @param[in] time the timeout for example chrono::millies(100)
+            @author Benjamin Meyer
+            @date 01.12.2015 17:49
+            */
             template<typename AllowTime> void await_operation(AllowTime const& deadline_or_duration);
             volatile bool m_cancled;
 
-            char* read(const size_t& count);
             unsigned long long m_id;
+            /**
+            \brief read into a buffer
+
+            @param[in] size_t how much byte to read
+            @return a ptr to the buffer. need to be deleted!
+            @author Benjamin Meyer
+            @date 01.12.2015 17:49
+            */
+            char* read(const size_t& count);
         };
     }
 }

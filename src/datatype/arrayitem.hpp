@@ -18,6 +18,7 @@
 // # along with this program. If not, see <http://www.gnu.org/licenses/>.     #
 // ############################################################################
 // **/
+
 template <typename T>
 ArrayItem<T>::ArrayItem(T& t, const ETypes& e): BaseType<T>(t), m_type(e)
 {
