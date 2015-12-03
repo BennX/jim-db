@@ -20,7 +20,8 @@
 **/
 
 #pragma once
-#include "task.h"
+#include "itask.h"
+#include "../network/message.h"
 
 namespace jimdb
 {
@@ -32,11 +33,16 @@ namespace jimdb
         \author Benjamin Meyer
         \date 02.10.2015 16:21
         **/
-        class HandshakeTask : public Task
+        class HandshakeTask : public ITask
         {
         public:
-            explicit HandshakeTask(const std::shared_ptr<network::IClient> client);
+	        explicit HandshakeTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,const std::shared_ptr<network::Message> msg);
+
+            ~HandshakeTask() override;
             void operator()() override;
+		private:
+			std::shared_ptr<network::Message> m_msg;
+
         };
     }
 }

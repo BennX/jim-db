@@ -59,7 +59,16 @@ namespace jimdb
             doc.SetObject();
             doc.AddMember(rapidjson::Value(MessageTypeMap::get(WHAT), doc.GetAllocator()), rapidjson::Value(what.c_str(),
                           doc.GetAllocator()), doc.GetAllocator());
-            return generate(ERROR, doc);
+            return generate(ERROR_L, doc);
+        }
+
+        std::shared_ptr<std::string> MessageFactory::wrap(const std::shared_ptr<std::string>& s)
+        {
+            char length[8 + 1];
+            sprintf(length, "%8d", static_cast<int>(s->size()));
+            auto l_message = std::make_shared<std::string>(length);
+            l_message->append(*s);
+            return l_message;
         }
 
         std::shared_ptr<std::string> MessageFactory::generateResultInsert(const uint64_t& oid)
@@ -86,7 +95,15 @@ namespace jimdb
             rapidjson::StringBuffer strbuf;
             rapidjson::Writer<rapidjson::StringBuffer> writer(strbuf);
             data.Accept(writer);
-            return std::make_shared<std::string>(strbuf.GetString());
+
+            char length[8 + 1];
+            sprintf(length, "%8d", static_cast<int>(strbuf.GetSize()));
+            auto l_message = std::string(length);
+            l_message += strbuf.GetString();
+
+            return std::make_shared<std::string>(l_message);
         }
+
+
     }
 }

@@ -21,7 +21,9 @@
 
 
 #pragma once
-#include "task.h"
+#include "itask.h"
+#include "../network/message.h"
+
 namespace jimdb
 {
     namespace tasking
@@ -34,11 +36,16 @@ namespace jimdb
         \author Benjamin Meyer
         \date 02.10.2015 16:20
         */
-        class RequestTask :public Task
+        class RequestTask : public ITask
         {
         public:
-            explicit RequestTask(const std::shared_ptr<network::IClient> client);
+
+
+	        explicit RequestTask(const std::shared_ptr<asio::ip::tcp::socket>& sock, const std::shared_ptr<network::Message> msg);
+
             void operator()() override;
+        private:
+            std::shared_ptr<network::Message> m_msg;
         };
     }
 }

@@ -43,7 +43,7 @@ std::shared_ptr<memorymanagement::Page> PageIndex::find(const size_t& free)
         //if the page has a chunk where i can compleatly fit
         // faster then try insert and revert if not fit
         // else free() > free for a try insert lateron
-        if (it->second->free(free))
+        if (!it->second->isLocked() && it->second->free(free))
         {
             return it->second; //dont unlock when returned
         }

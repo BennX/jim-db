@@ -20,9 +20,11 @@
 **/
 
 #pragma once
-#include "task.h"
 #include <memory>
 #include <deque>
+#include "itask.h"
+#include <mutex>
+#include "../log/logger.h"
 namespace jimdb
 {
     namespace tasking
@@ -56,7 +58,7 @@ namespace jimdb
             *@author Benjamin Meyer
             *@date Mittwoch, 22. Juli 2015
             */
-            inline bool push_pack(std::shared_ptr<Task> t);
+            inline bool push_pack(std::shared_ptr<ITask> t);
 
             /**\brief returns a task without copying it
             *
@@ -66,7 +68,7 @@ namespace jimdb
             *@date Mittwoch, 22. Juli 2015
             */
 
-            inline std::shared_ptr<Task> pop_front();
+            inline std::shared_ptr<ITask> pop_front();
             /**\brief Returns the current size of the taskqueue
             *
             * If its 0 do not execute a task of it!
@@ -80,7 +82,7 @@ namespace jimdb
             ~TaskQueue();
 
             static TaskQueue m_instance;
-            std::deque<std::shared_ptr<Task>> m_tasks;
+            std::deque<std::shared_ptr<ITask>> m_tasks;
             std::condition_variable m_cond;
             std::mutex m_mutex;
             size_t m_maxSize;
