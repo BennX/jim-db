@@ -32,6 +32,7 @@ namespace jimdb
 
         ASIOClienthandle::~ASIOClienthandle()
         {
+			m_socket->shutdown(asio::ip::tcp::socket::shutdown_both);
             m_socket->close();
         }
 
