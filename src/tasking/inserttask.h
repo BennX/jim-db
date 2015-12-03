@@ -19,19 +19,21 @@
 // ############################################################################
 // **/
 #pragma once
-#include "task.h"
 #include <vector>
 #include "../bench/bench.h"
+#include "itask.h"
+#include "../network/message.h"
 
 namespace jimdb
 {
     namespace tasking
     {
-        class InsertTask : public Task
+        class InsertTask : public ITask
         {
         public:
-            explicit InsertTask(const std::shared_ptr<network::IClient>& client, const std::shared_ptr<network::Message> m);
+            InsertTask(const std::shared_ptr<asio::ip::tcp::socket>& sock, const std::shared_ptr<network::Message>& message);
             void operator()() override;
+
         private:
             std::shared_ptr<network::Message> m_msg;
 

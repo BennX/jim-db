@@ -8,11 +8,10 @@ namespace jimdb
 {
     namespace tasking
     {
-        DeleteTask::DeleteTask(const std::shared_ptr<jimdb::network::IClient>& client,
-                               const std::shared_ptr<jimdb::network::Message> m) : Task(client), m_msg(m)
-        {
 
-        }
+        DeleteTask::DeleteTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
+                               const std::shared_ptr<network::Message>& message): ITask(sock),
+            m_msg(message) {}
 
         void DeleteTask::operator()()
         {
@@ -22,7 +21,7 @@ namespace jimdb
             if (l_data.FindMember("oid__") == l_data.MemberEnd())
             {
                 LOG_WARN << "invalid delete task. no oid__";
-                m_client->send(network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::MISSING_OID_DELETE]));
+                // m_client->send(network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::MISSING_OID_DELETE]));
                 return;
             }
 
@@ -30,7 +29,7 @@ namespace jimdb
             if (!l_data["oid__"].IsInt64())
             {
                 LOG_WARN << "invalid delete task. oid__ is no int";
-                m_client->send(network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::INVALID_OID_DELETE]));
+                //  m_client->send(network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::INVALID_OID_DELETE]));
                 return;
             }
 
@@ -39,7 +38,7 @@ namespace jimdb
             if (!index::ObjectIndex::getInstance().contains(l_oid))
             {
                 LOG_WARN << "invalid delete task. oid not found";
-                m_client->send(network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::OID_NOT_FOUND_DELETE]));
+                //  m_client->send(network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::OID_NOT_FOUND_DELETE]));
                 return;
             }
 

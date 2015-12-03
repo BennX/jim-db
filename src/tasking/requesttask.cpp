@@ -33,19 +33,20 @@ namespace jimdb
 {
     namespace tasking
     {
-        RequestTask::RequestTask(const std::shared_ptr<network::IClient> client) : Task(client)
-        {
-            m_bench = new Bench(m_client->getID());
-        }
 
-        void RequestTask::operator()()
-        {
-			delete m_bench;//stop timing
+RequestTask::RequestTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
+                                 const std::shared_ptr<network::Message> msg): ITask(sock), m_msg(msg) {m_bench = new Bench(m_client->getID());}
+
+void RequestTask::operator()()
+{
+            delete m_bench;//stop timing
             auto l_message = m_client->getData();
 
-            //start benchmarking
+                                     //start benchmarking
             Bench bench(m_client->getID());
             if(l_message == nullptr)
+            if(m_msg == nullptr)
+
             {
                 LOG_WARN << "failed recv after handshake.";
                 //no need to answer
@@ -53,34 +54,34 @@ namespace jimdb
             }
 
             //check the json
-            auto& doc = (*l_message)();
+            auto& doc = (*m_msg)();
             if(doc.HasParseError())
             {
                 LOG_WARN << "Invalid JSON request.";
-                m_client->send(network::MessageFactory().error(
-                                   error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::INVALID_JSON_REQUEST]));
+                // m_client->send(network::MessageFactory().error(
+                //error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::INVALID_JSON_REQUEST]));
                 return;
             }
 
             if (doc.FindMember("type") == doc.MemberEnd() || doc.FindMember("data") == doc.MemberEnd())
             {
                 LOG_WARN << "Invalid JSON request. Missing type or data member";
-                m_client->send(network::MessageFactory().error(
-                                   error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::MISSING_TYPE_OR_DATA_REQUEST]));
+                // m_client->send(network::MessageFactory().error(
+                // error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::MISSING_TYPE_OR_DATA_REQUEST]));
                 return;
             }
 
             if (!doc["type"].IsString() || !doc["data"].IsObject())
             {
                 LOG_WARN << "Invalid JSON request. Missing type isString or data isObject.";
-                m_client->send(network::MessageFactory().error(
-                                   error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::TYPE_OR_DATA_WRONG_TYPE_REQUEST]));
+                //  m_client->send(network::MessageFactory().error(
+                // error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::TYPE_OR_DATA_WRONG_TYPE_REQUEST]));
                 return;
             }
 
             if (doc["type"].GetString() == std::string("insert"))
             {
-                TaskQueue::getInstance().push_pack(std::make_shared<InsertTask>(m_client, l_message));
+                TaskQueue::getInstance().push_pack(std::make_shared<InsertTask>(m_socket, m_msg));
                 return;
             }
 
@@ -96,7 +97,7 @@ namespace jimdb
 
             if (doc["type"].GetString() == std::string("find"))
             {
-                TaskQueue::getInstance().push_pack(std::make_shared<FindTask>(m_client, l_message));
+                TaskQueue::getInstance().push_pack(std::make_shared<FindTask>(m_socket, m_msg));
                 return;
             }
 

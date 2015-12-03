@@ -40,9 +40,11 @@ namespace jimdb
 
 			int accept(const bool& blocking) override;
 			bool start() override;
-		private:
 			asio::io_service m_io_service;
+		private:
+			
 			std::shared_ptr<asio::ip::tcp::acceptor> m_acceptor;
+			std::shared_ptr<asio::ip::tcp::socket> m_sock;
 		};
 	}
 }

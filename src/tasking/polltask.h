@@ -20,20 +20,34 @@
 // **/
 #pragma once
 #include "itask.h"
-#include "../network/message.h"
+#include <chrono>
+#include "../thread/spinlock.h"
 
 namespace jimdb
 {
     namespace tasking
     {
-        class FindTask : public ITask
+        enum PollType
+        {
+            HANDSHAKE,
+            RECEIVE
+        };
+
+        class PollTask : public ITask
         {
         public:
-	        FindTask(const std::shared_ptr<asio::ip::tcp::socket>& sock, const std::shared_ptr<network::Message>& message);;
+	        bool continuous() override;
+	        explicit PollTask(const std::shared_ptr<asio::ip::tcp::socket>& sock, const PollType& p, const int& timeout = 10000);
+            ~PollTask() override;
             void operator()() override;
 
         private:
-            std::shared_ptr<network::Message> m_msg;
+            std::chrono::steady_clock::time_point m_last;
+            int m_timeout;
+            char* m_buffer;
+            bool m_active;
+            PollType m_type;
         };
     }
 }
+#include "polltask.hpp"

@@ -24,51 +24,53 @@
 #include "requesttask.h"
 #include "../network/messagefactory.h"
 #include "../common/error.h"
+#include "polltask.h"
 class RequestTask;
 namespace jimdb
 {
     namespace tasking
     {
-        HandshakeTask::HandshakeTask(const std::shared_ptr<network::IClient> client) : Task(client) { }
+        HandshakeTask::HandshakeTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
+                                     const std::shared_ptr<network::Message> msg): ITask(sock), m_msg(msg) {}
+
+        HandshakeTask::~HandshakeTask() {}
 
         void HandshakeTask::operator()()
         {
-            //sending a handshake HI and wait 1s to return a hi as shake
-            m_client->send(network::MessageFactory().handshake());
-            std::shared_ptr<network::Message> l_message = m_client->getData();
-
-            if (l_message == nullptr)
-            {
-                //since we didnt recv we assume that we
-                // cant answer a error message here
-                LOG_DEBUG << "message is null";
-                return;
-            }
-
             try
             {
-                auto& l_doc = (*l_message)();
+                auto& l_doc = (*m_msg)();
             }
             catch (std::runtime_error& e)
             {
                 std::string  error = "parsing error Handshake: ";
                 error += e.what();
                 LOG_ERROR << error;
-                m_client->send(network::MessageFactory().error(
-                                   error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::PARSEERROR_HANDSHAKE]));
+                //m_client->send(network::MessageFactory().error(
+                //error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::PARSEERROR_HANDSHAKE]));
                 return;
             }
 
-            auto& l_doc = (*l_message)();
+            auto& l_doc = (*m_msg)();
             if (l_doc.GetParseError() != rapidjson::kParseErrorNone)
             {
                 LOG_ERROR << "Handshake parsing error.";
-                m_client->send(network::MessageFactory().error(
-                                   error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::PARSEERROR_HANDSHAKE]));
+                //m_client->send(network::MessageFactory().error(
+                //error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::PARSEERROR_HANDSHAKE]));
                 return;
             }
 
             //check if handshaje is valid
+            if(l_doc.FindMember("data") == l_doc.MemberEnd())
+            {
+                return;
+            }
+            if (l_doc["data"].FindMember("handshake") == l_doc["data"].MemberEnd())
+            {
+                return;
+            }
+
+
             if (std::string("hi") != l_doc["data"]["handshake"].GetString())
             {
                 LOG_WARN << "handshake Failed";
@@ -77,7 +79,11 @@ namespace jimdb
                 return; //return on failur
             }
             //if handshake is valid do something
-            TaskQueue::getInstance().push_pack(std::make_shared<RequestTask>(m_client));
+//            TaskQueue::getInstance().push_pack(std::make_shared<RequestTask>(m_client));
+
+            //after fully request
+            LOG_DEBUG << "Handshake Successfull!";
+            TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, PollType::RECEIVE));
         }
     }
 }

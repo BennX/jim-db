@@ -5,18 +5,20 @@
 #include "../common/configuration.h"
 #include "../network/messagefactory.h"
 #include "../assert.h"
+<<<<<<< HEAD
 #include "../bench/bench.h"
+=======
+#include "taskqueue.h"
+#include "polltask.h"
+>>>>>>> refs/remotes/origin/develop
 
 namespace jimdb
 {
     namespace tasking
     {
-        InsertTask::InsertTask(const std::shared_ptr<network::IClient>& client,
-                               const std::shared_ptr<network::Message> m) : Task(client), m_msg(m)
-        {
-            m_bench = new Bench(m_client->getID());
-        }
-
+        InsertTask::InsertTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
+                               const std::shared_ptr<network::Message>& message): ITask(sock),m_msg(m)
+            m_msg(message) {m_bench = new Bench(m_client->getID());}
 
         /**
         * Really importand to understand!!
@@ -64,7 +66,14 @@ namespace jimdb
             delete m_bench;//stop timing here
 
             //generate answer and return it.
-            m_client->send(network::MessageFactory().generateResultInsert(oid));
+
+            auto msg = network::MessageFactory().generateResultInsert(oid);
+
+            m_socket->async_write_some(asio::buffer(msg->c_str(), msg->length()), [&](std::error_code ec,
+            size_t bytes_read) {});
+
+	    TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
+
         }
 
         size_t InsertTask::checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& value,

@@ -29,13 +29,14 @@ namespace jimdb
         {
         private:
             std::atomic_flag lck;
-
+            bool m_locked;
         public:
             //since atomic_flag has no assignement we need to clear it like this.
             inline SpinLock();
             ~SpinLock() {};
             inline void lock();
             inline void unlock();
+            inline operator bool() const;
         };
     }
 }
