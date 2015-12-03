@@ -5,14 +5,17 @@
 #include "../common/configuration.h"
 #include "../network/messagefactory.h"
 #include "../assert.h"
+#include "taskqueue.h"
+#include "polltask.h"
 
 namespace jimdb
 {
     namespace tasking
     {
-        InsertTask::InsertTask(const std::shared_ptr<network::IClient>& client,
-                               const std::shared_ptr<network::Message> m) : Task(client), m_msg(m) {}
 
+        InsertTask::InsertTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
+                               const std::shared_ptr<network::Message>& message): ITask(sock),
+            m_msg(message) {}
 
         /**
         * Really importand to understand!!
@@ -57,8 +60,12 @@ namespace jimdb
             auto oid = l_page->insert(dat);
 
             //generate answer and return it.
-            network::MessageFactory factory;
-            m_client->send(factory.generateResultInsert(oid));
+            auto msg = network::MessageFactory().generateResultInsert(oid);
+
+            m_socket->async_write_some(asio::buffer(msg->c_str(), msg->length()), [&](std::error_code ec,
+            size_t bytes_read) {});
+
+			TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
         }
 
         size_t InsertTask::checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& value,

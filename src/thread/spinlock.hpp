@@ -30,12 +30,19 @@ namespace jimdb
 
         inline void SpinLock::lock()
         {
+            m_locked = true;
             while (lck.test_and_set(std::memory_order_acquire)) {}
         }
 
         inline void SpinLock::unlock()
         {
             lck.clear(std::memory_order_release);
+            m_locked = false;
+        }
+
+        inline SpinLock::operator bool() const
+        {
+            return m_locked;
         }
     }
 }

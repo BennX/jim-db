@@ -42,8 +42,10 @@ namespace jimdb
             while (m_running)
             {
                 auto task = m_tasks.pop_front();
-				if(task)
-					(*task)(); //execute the task
+                if(task)
+                    (*task)(); //execute the task
+				if (task->continuous())
+					m_tasks.push_pack(task);
             }
         }
     }

@@ -18,7 +18,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.     #
 ############################################################################
 **/
-inline bool TaskQueue::push_pack(std::shared_ptr<Task> t)
+inline bool TaskQueue::push_pack(std::shared_ptr<ITask> t)
 {
 	std::unique_lock<std::mutex> lock(m_mutex);
     //if it's 0 the queue "is unlimited".
@@ -34,7 +34,7 @@ inline bool TaskQueue::push_pack(std::shared_ptr<Task> t)
     return true;
 }
 
-inline std::shared_ptr<Task> TaskQueue::pop_front()
+inline std::shared_ptr<ITask> TaskQueue::pop_front()
 {
     //regular lock so noone else acces this area now
     std::unique_lock<std::mutex> lock(m_mutex);

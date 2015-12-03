@@ -89,7 +89,7 @@ namespace jimdb
 
         bool Page::isLocked() const
         {
-            return m_rwLock;
+            return m_rwLock || m_spin;
         }
 
         bool Page::free(const size_t& size)
@@ -106,6 +106,7 @@ namespace jimdb
 
         size_t Page::insert(const rapidjson::GenericValue<rapidjson::UTF8<>>& value)
         {
+            std::lock_guard<tasking::SpinLock> lock(m_spin);
             //here we know this page has one chunk big enough to fitt the whole object
             //including its overhead! so start inserting it.
 

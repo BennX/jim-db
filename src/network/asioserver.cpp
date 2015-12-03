@@ -21,10 +21,11 @@
 
 
 #include "asioserver.h"
-#include "asioclienthandle.h"
 #include "../tasking/taskqueue.h"
-#include "../tasking/handshake.h"
 #include "../common/configuration.h"
+#include "../tasking/polltask.h"
+#include "messagefactory.h"
+#include "../log/logger.h"
 
 namespace jimdb
 {
@@ -32,16 +33,29 @@ namespace jimdb
     {
         int ASIOServer::accept(const bool& blocking)
         {
-            auto l_sock = std::make_shared<asio::ip::tcp::socket>(m_io_service);
-            m_acceptor->accept(*l_sock);
-            auto l_client = std::make_shared<ASIOClienthandle>(l_sock);
-            tasking::TaskQueue::getInstance().push_pack(std::make_shared<tasking::HandshakeTask>(l_client));
+            m_sock = std::make_shared<asio::ip::tcp::socket>(m_io_service);
+            m_acceptor->async_accept(*m_sock, [&](asio::error_code ec)
+            {
+                if (ec)
+                    LOG_DEBUG << ec.message();
+                //write out to client
+                auto l_msg = MessageFactory().handshake();
+
+                //push the handshake
+                asio::async_write(*m_sock, asio::buffer(l_msg->c_str(), l_msg->size()), [&](std::error_code ec,
+                size_t bytes_read) {});
+
+                tasking::TaskQueue::getInstance().push_pack(std::make_shared<tasking::PollTask>(m_sock, tasking::PollType::HANDSHAKE));
+
+                accept(false);
+            });
+
             return 0;
         }
 
         bool ASIOServer::start()
         {
-            return false;
+            return m_io_service.run();
         }
 
         ASIOServer::ASIOServer() : m_io_service() , m_acceptor(nullptr)

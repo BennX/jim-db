@@ -1,13 +1,18 @@
 ﻿#include "findtask.h"
 #include "../index/objectindex.h"
 #include "../index/pageindex.h"
+#include "../network/messagefactory.h"
+#include "polltask.h"
+#include "taskqueue.h"
 
 namespace jimdb
 {
     namespace tasking
     {
-        FindTask::FindTask(const std::shared_ptr<network::IClient>& client,
-                           const std::shared_ptr<network::Message> m) : Task(client), m_msg(m) {}
+
+        FindTask::FindTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
+                           const std::shared_ptr<network::Message>& message): ITask(sock),
+            m_msg(message) {}
 
         void FindTask::operator()()
         {
@@ -41,7 +46,11 @@ namespace jimdb
             auto l_page = index::PageIndex::getInstance()[l_meta.m_page];
             //get/create the object
             auto l_obj = l_page->getJSONObject(l_meta.m_pos);
-			m_client->send(l_obj);
+
+            auto l_msg = network::MessageFactory().wrap(l_obj);
+            m_socket->async_write_some(asio::buffer(l_msg->c_str(), l_msg->size()), [&](std::error_code ec,
+            size_t bytes_read) {});
+			TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
         }
     }
 }

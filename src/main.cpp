@@ -46,7 +46,8 @@ of memory and allow to querry them.
  * message, that is thrown on uncaught exceptions. The handler need not call the
  * "abort()" function, because this creates the message
  **/
-void program_terminate() {
+void program_terminate()
+{
     std::cerr << "error detected which is not handled by the main program" << std::endl;
     exit(EXIT_FAILURE);
 }
@@ -55,7 +56,7 @@ void program_terminate() {
 int main(int argc, char* argv[])
 {
     std::set_terminate(program_terminate);
-    
+
     //logger can be at init using the startup log
     auto& args = jimdb::common::CmdArgs::getInstance();
     args.init(argc, argv);
@@ -124,9 +125,6 @@ int main(int argc, char* argv[])
     //set up the max number of tasks
     tasks.setMaxSize(cfg[jimdb::common::MAX_TASKS].GetInt());
 
-    std::shared_ptr<jimdb::network::IServer> tcpServer = std::make_shared<jimdb::network::ASIOServer>();
-    //std::shared_ptr<jimdb::network::IServer> tcpServer = std::make_shared<jimdb::network::TCPServer>(tasks);
-    //tcpServer->start();
     //start the workers
     auto threads = cfg[jimdb::common::THREADS].GetInt();
     //if the config value is 0 take hardware conc.
@@ -141,10 +139,12 @@ int main(int argc, char* argv[])
     {
         m_workers.push_back(std::make_unique<jimdb::tasking::Worker>(tasks));
     }
-    //use this as acceptor and handshaker
-    //do nothing else here!
-    while (true)
-    {
-        tcpServer->accept(true); //call accept blocking
-    }
+
+
+    jimdb::network::ASIOServer l_server;
+    l_server.accept(false);
+    //go into the asio service loop
+    l_server.start();
+
+    LOG_ERROR << "This is bad we lost the io service and lost our loop.";
 }

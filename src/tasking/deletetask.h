@@ -19,19 +19,22 @@
 // ############################################################################
 // **/
 #pragma once
-#include "task.h"
+#include "itask.h"
+#include "../network/iclient.h"
+
 namespace jimdb
 {
-	namespace tasking
-	{
-		class DeleteTask : public jimdb::tasking::Task
-		{
+    namespace tasking
+    {
+        class DeleteTask : public ITask
+        {
 		public:
-			DeleteTask(const std::shared_ptr<jimdb::network::IClient>& client, const std::shared_ptr<jimdb::network::Message> m);
-			void operator()() override;
+	        DeleteTask(const std::shared_ptr<asio::ip::tcp::socket>& sock, const std::shared_ptr<network::Message>& message);
 
-		private:
-			std::shared_ptr<network::Message> m_msg;
-		};
-	}
+	        void operator()() override;
+
+        private:
+            std::shared_ptr<network::Message> m_msg;
+        };
+    }
 }
