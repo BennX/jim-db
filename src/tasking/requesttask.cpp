@@ -40,18 +40,6 @@ RequestTask::RequestTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
 void RequestTask::operator()()
 {
             delete m_bench;//stop timing
-            auto l_message = m_client->getData();
-
-                                     //start benchmarking
-            Bench bench(m_client->getID());
-            if(l_message == nullptr)
-            if(m_msg == nullptr)
-
-            {
-                LOG_WARN << "failed recv after handshake.";
-                //no need to answer
-                return;
-            }
 
             //check the json
             auto& doc = (*m_msg)();
