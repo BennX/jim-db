@@ -24,8 +24,6 @@
 #include "taskqueue.h"
 #include "inserttask.h"
 #include "findtask.h"
-#include "../network/messagefactory.h"
-#include "../common/error.h"
 #include "../bench/bench.h"
 #include "../bench/benchmark.h"
 
@@ -33,17 +31,14 @@ namespace jimdb
 {
     namespace tasking
     {
-<<<<<<< HEAD
-=======
         RequestTask::RequestTask(const std::shared_ptr<network::AsioHandle>& sock,
-                                 const std::shared_ptr<network::Message> msg): ITask(sock), m_msg(msg) {}
->>>>>>> refs/remotes/origin/master
+                                 const std::shared_ptr<network::Message> msg): ITask(sock), m_msg(msg)
+        {
+            m_bench = new Bench(m_socket->ID());
+        }
 
-RequestTask::RequestTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
-                                 const std::shared_ptr<network::Message> msg): ITask(sock), m_msg(msg) {m_bench = new Bench(m_client->getID());}
-
-void RequestTask::operator()()
-{
+        void RequestTask::operator()()
+        {
             delete m_bench;//stop timing
 
             //check the json
@@ -94,10 +89,10 @@ void RequestTask::operator()()
                 return;
             }
 
-			if(doc["type"].GetString() ==std::string("bench"))
-			{
-				LOG_DEBUG << Benchmark::getInstance();
-			}
+            if(doc["type"].GetString() == std::string("bench"))
+            {
+                LOG_DEBUG << Benchmark::getInstance();
+            }
         }
     }
 }
