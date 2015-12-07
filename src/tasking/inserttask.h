@@ -23,6 +23,7 @@
 #include "../bench/bench.h"
 #include "itask.h"
 #include "../network/message.h"
+#include "../network/asiohandle.h"
 
 namespace jimdb
 {
@@ -31,7 +32,7 @@ namespace jimdb
         class InsertTask : public ITask
         {
         public:
-            InsertTask(const std::shared_ptr<asio::ip::tcp::socket>& sock, const std::shared_ptr<network::Message>& message);
+            InsertTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message);
             void operator()() override;
 
         private:

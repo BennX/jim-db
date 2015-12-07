@@ -18,35 +18,45 @@
 // # along with this program. If not, see <http://www.gnu.org/licenses/>.     #
 // ############################################################################
 // **/
-
-void PageIndex::add(const KEY& k, const VALUE& type)
+namespace jimdb
 {
-    tasking::RWLockGuard<> lock(m_lock, tasking::WRITE);
-    m_last = type;
-    //at it manual to the idx else
-    // we have lock in lock here!
-    m_index[k] = type;
-}
-
-std::shared_ptr<memorymanagement::Page> PageIndex::last()
-{
-    tasking::RWLockGuard<>  lock(m_lock, tasking::READ);
-    return m_last;
-}
-
-std::shared_ptr<memorymanagement::Page> PageIndex::find(const size_t& free)
-{
-    tasking::RWLockGuard<> lock(m_lock, tasking::WRITE);
-    //now find right but backwards
-    for (auto it = m_index.rbegin(); it != m_index.rend(); ++it)
+    namespace index
     {
-        //if the page has a chunk where i can compleatly fit
-        // faster then try insert and revert if not fit
-        // else free() > free for a try insert lateron
-        if (!it->second->isLocked() && it->second->free(free))
+        void PageIndex::add(const KEY& k, const VALUE& type)
         {
-            return it->second; //dont unlock when returned
+            tasking::RWLockGuard<> lock(m_lock, tasking::WRITE);
+            m_index[k] = type;//at to regular index
+
+            //insert into the "last idx"
+            m_freePages[k] = type;
+        }
+
+
+        std::shared_ptr<memorymanagement::Page> PageIndex::find(const size_t& free)
+        {
+            tasking::RWLockGuard<> lock(m_lock, tasking::WRITE);
+            //now find right but backwards
+            for (auto it = m_freePages.rbegin(); it != m_freePages.rend();)
+            {
+                //if the page has a chunk where i can compleatly fit
+                // faster then try insert and revert if not fit
+                // else free() > free for a try insert lateron
+
+                if(it->second->full())
+                {
+                    //the page is full erase it from the "free pages"
+                    m_freePages.erase(it++);
+                    continue;
+                }
+                //check the others
+                if (!it->second->isLocked() && it->second->free(free))
+                {
+                    return it->second; //dont unlock when returned
+                }
+				//increment here
+				++it;
+            }
+            return nullptr;
         }
     }
-    return nullptr;
 }

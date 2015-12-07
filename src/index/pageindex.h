@@ -38,7 +38,6 @@ namespace jimdb
             static PageIndex& getInstance();
 
             inline void add(const KEY& k, const VALUE& type);
-            inline std::shared_ptr<memorymanagement::Page> last();
             /**
             \brief find a unlocked page which can fit free
 
@@ -49,12 +48,12 @@ namespace jimdb
             */
             inline std::shared_ptr<memorymanagement::Page> find(const size_t& free);
         private:
-            PageIndex() : m_last(nullptr) {};
-            //store the last inserted page
-            //should be the "most empty"
-            std::shared_ptr<memorymanagement::Page> m_last;
+            PageIndex() {};
+
             static PageIndex m_instance;
+
+            stx::btree_map<size_t, std::shared_ptr<memorymanagement::Page>> m_freePages;
         };
-#include "pageindex.hpp"
     }
 }
+#include "pageindex.hpp"

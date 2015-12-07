@@ -19,22 +19,31 @@
 // ############################################################################
 // **/
 #pragma once
-#include "itask.h"
-#include "../network/iclient.h"
-
+#define ASIO_STANDALONE
+#define ASIO_HAS_STD_CHRONO
+#define ASIO_HAS_STD_ARRAY
+#define ASIO_HAS_STD_TYPE_TRAITS
+#define ASIO_HAS_CSTDINT
+#define ASIO_HAS_STD_SHARED_PTR
+#define ASIO_HAS_STD_ADDRESSOF
+#include <asio.hpp>
 namespace jimdb
 {
-    namespace tasking
+    namespace network
     {
-        class DeleteTask : public ITask
+        class AsioHandle : public asio::ip::tcp::socket
         {
-		public:
-	        DeleteTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message);
+        public:
+            explicit AsioHandle(asio::io_service& io_service);
+            AsioHandle(asio::io_service& io_service, const protocol_type& protocol);
+            AsioHandle(asio::io_service& io_service, const endpoint_type& endpoint);
+            AsioHandle(asio::io_service& io_service, const protocol_type& protocol, const native_handle_type& native_socket);
 
-	        void operator()() override;
-
+            void operator<<(std::shared_ptr<std::string> s);
+            uint64_t ID() const;
         private:
-            std::shared_ptr<network::Message> m_msg;
+            uint64_t m_id;
+            static uint64_t s_counter;
         };
     }
 }

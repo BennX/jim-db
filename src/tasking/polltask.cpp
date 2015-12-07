@@ -17,7 +17,7 @@ namespace jimdb
             return m_active;
         }
 
-        PollTask::PollTask(const std::shared_ptr<asio::ip::tcp::socket>& sock, const PollType& p,
+        PollTask::PollTask(std::shared_ptr<network::AsioHandle> sock, const PollType& p,
                            const int& timeout) : ITask(sock),
             m_timeout(timeout), m_buffer(new char[MESSAGE_SIZE + 1]), m_active(true), m_type(p)
         {

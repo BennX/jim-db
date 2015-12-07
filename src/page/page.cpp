@@ -92,6 +92,12 @@ namespace jimdb
             return m_rwLock || m_spin;
         }
 
+        bool Page::full()
+        {
+            std::lock_guard<tasking::SpinLock> lock(m_spin);
+            return findHeaderPosition(false) == nullptr;
+        }
+
         bool Page::free(const size_t& size)
         {
             std::lock_guard<tasking::SpinLock> lock(m_spin);

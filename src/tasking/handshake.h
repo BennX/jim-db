@@ -36,7 +36,7 @@ namespace jimdb
         class HandshakeTask : public ITask
         {
         public:
-	        explicit HandshakeTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,const std::shared_ptr<network::Message> msg);
+	        explicit HandshakeTask(const std::shared_ptr<network::AsioHandle>& sock,const std::shared_ptr<network::Message> msg);
 
             ~HandshakeTask() override;
             void operator()() override;

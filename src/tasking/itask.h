@@ -7,6 +7,8 @@
 #define ASIO_HAS_STD_SHARED_PTR
 #define ASIO_HAS_STD_ADDRESSOF
 #include <asio.hpp>
+#include "../network/asiohandle.h"
+
 namespace jimdb
 {
     namespace tasking
@@ -14,7 +16,7 @@ namespace jimdb
         class ITask
         {
         public:
-            explicit ITask(std::shared_ptr<asio::ip::tcp::socket> sock) : m_socket(sock) {};
+            explicit ITask(std::shared_ptr<network::AsioHandle> sock) : m_socket(sock) {};
             virtual ~ITask() { };
 
             virtual bool continuous()
@@ -24,7 +26,7 @@ namespace jimdb
 
             virtual void operator()() = 0;
         protected:
-            std::shared_ptr<asio::ip::tcp::socket> m_socket;
+            std::shared_ptr<network::AsioHandle> m_socket;
         };
     }
 }

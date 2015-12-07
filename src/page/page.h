@@ -55,6 +55,15 @@ namespace jimdb
             bool isLocked() const;
 
             /**
+            \brief check if a page is full
+
+            @return true if the page is full.(no header pos)
+            @author Benjamin Meyer
+            @date 04.12.2015 10:47
+            */
+            bool full();
+
+            /**
             \brief check if there is a chunk min size
 
             @return true if there is one chunk big enough
@@ -63,6 +72,7 @@ namespace jimdb
             @date 31.10.2015 13:29
             */
             bool free(const size_t& size);
+
             /**
             \brief Insert a json obj to the page and checks for the meta data
 

@@ -29,7 +29,7 @@ namespace jimdb
         class FindTask : public ITask
         {
         public:
-	        FindTask(const std::shared_ptr<asio::ip::tcp::socket>& sock, const std::shared_ptr<network::Message>& message);;
+	        FindTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message);;
             void operator()() override;
 
         private:

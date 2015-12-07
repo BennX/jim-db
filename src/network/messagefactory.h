@@ -61,8 +61,7 @@ namespace jimdb
             MessageFactory();
             std::shared_ptr<std::string> handshake();
             std::shared_ptr<std::string> error(const std::string& what);
-			//wraps a string so it can be send
-			std::shared_ptr<std::string> wrap(const std::shared_ptr<std::string>& s);
+
             /**
             \brief generates a result message of an insert
 
