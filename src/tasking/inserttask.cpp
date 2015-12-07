@@ -16,9 +16,16 @@ namespace jimdb
 {
     namespace tasking
     {
+<<<<<<< HEAD
         InsertTask::InsertTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
                                const std::shared_ptr<network::Message>& message): ITask(sock),m_msg(m)
             m_msg(message) {m_bench = new Bench(m_client->getID());}
+=======
+
+        InsertTask::InsertTask(const std::shared_ptr<network::AsioHandle>& sock,
+                               const std::shared_ptr<network::Message>& message): ITask(sock),
+            m_msg(message) {}
+>>>>>>> refs/remotes/origin/master
 
         /**
         * Really importand to understand!!
@@ -63,6 +70,7 @@ namespace jimdb
             //insert the obj to the page
             auto oid = l_page->insert(dat);
 
+<<<<<<< HEAD
             delete m_bench;//stop timing here
 
             //generate answer and return it.
@@ -74,6 +82,12 @@ namespace jimdb
 
 	    TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
 
+=======
+            //generate answer and return it
+            *m_socket << network::MessageFactory().generateResultInsert(oid);
+
+            TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
+>>>>>>> refs/remotes/origin/master
         }
 
         size_t InsertTask::checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& value,

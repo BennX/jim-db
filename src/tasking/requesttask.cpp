@@ -33,6 +33,11 @@ namespace jimdb
 {
     namespace tasking
     {
+<<<<<<< HEAD
+=======
+        RequestTask::RequestTask(const std::shared_ptr<network::AsioHandle>& sock,
+                                 const std::shared_ptr<network::Message> msg): ITask(sock), m_msg(msg) {}
+>>>>>>> refs/remotes/origin/master
 
 RequestTask::RequestTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
                                  const std::shared_ptr<network::Message> msg): ITask(sock), m_msg(msg) {m_bench = new Bench(m_client->getID());}
