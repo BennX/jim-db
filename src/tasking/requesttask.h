@@ -41,7 +41,7 @@ namespace jimdb
         public:
 
 
-	        explicit RequestTask(const std::shared_ptr<asio::ip::tcp::socket>& sock, const std::shared_ptr<network::Message> msg);
+	        explicit RequestTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message> msg);
 
             void operator()() override;
         private:

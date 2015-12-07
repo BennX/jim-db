@@ -30,7 +30,7 @@ namespace jimdb
 {
     namespace tasking
     {
-        RequestTask::RequestTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
+        RequestTask::RequestTask(const std::shared_ptr<network::AsioHandle>& sock,
                                  const std::shared_ptr<network::Message> msg): ITask(sock), m_msg(msg) {}
 
         void RequestTask::operator()()

@@ -13,7 +13,7 @@ namespace jimdb
     namespace tasking
     {
 
-        InsertTask::InsertTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
+        InsertTask::InsertTask(const std::shared_ptr<network::AsioHandle>& sock,
                                const std::shared_ptr<network::Message>& message): ITask(sock),
             m_msg(message) {}
 
@@ -59,13 +59,10 @@ namespace jimdb
             //insert the obj to the page
             auto oid = l_page->insert(dat);
 
-            //generate answer and return it.
-            auto msg = network::MessageFactory().generateResultInsert(oid);
+            //generate answer and return it
+            *m_socket << network::MessageFactory().generateResultInsert(oid);
 
-            m_socket->async_write_some(asio::buffer(msg->c_str(), msg->length()), [&](std::error_code ec,
-            size_t bytes_read) {});
-
-			TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
+            TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
         }
 
         size_t InsertTask::checkSizeAndMeta(const std::string& name, const rapidjson::GenericValue<rapidjson::UTF8<>>& value,

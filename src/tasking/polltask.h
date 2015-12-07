@@ -22,6 +22,7 @@
 #include "itask.h"
 #include <chrono>
 #include "../thread/spinlock.h"
+#include "../network/asiohandle.h"
 
 namespace jimdb
 {
@@ -37,7 +38,7 @@ namespace jimdb
         {
         public:
 	        bool continuous() override;
-	        explicit PollTask(const std::shared_ptr<asio::ip::tcp::socket>& sock, const PollType& p, const int& timeout = 10000);
+	        explicit PollTask(std::shared_ptr<network::AsioHandle> sock, const PollType& p, const int& timeout = 10000);
             ~PollTask() override;
             void operator()() override;
 

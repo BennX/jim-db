@@ -28,6 +28,8 @@
 #define ASIO_HAS_STD_SHARED_PTR
 #define ASIO_HAS_STD_ADDRESSOF
 #include <asio.hpp>
+#include "asiohandle.h"
+
 namespace jimdb
 {
 	namespace network
@@ -44,7 +46,7 @@ namespace jimdb
 		private:
 			
 			std::shared_ptr<asio::ip::tcp::acceptor> m_acceptor;
-			std::shared_ptr<asio::ip::tcp::socket> m_sock;
+			std::shared_ptr<AsioHandle> m_sock;
 		};
 	}
 }

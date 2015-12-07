@@ -9,7 +9,7 @@ namespace jimdb
     namespace tasking
     {
 
-        DeleteTask::DeleteTask(const std::shared_ptr<asio::ip::tcp::socket>& sock,
+        DeleteTask::DeleteTask(const std::shared_ptr<network::AsioHandle>& sock,
                                const std::shared_ptr<network::Message>& message): ITask(sock),
             m_msg(message) {}
 
