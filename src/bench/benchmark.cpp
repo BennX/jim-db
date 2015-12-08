@@ -45,6 +45,7 @@ std::ostream& operator<<(std::ostream& os, Benchmark& obj)
 
     std::ofstream of(obj.m_filename, std::ios::out | std::ios::app);
     of << ss.str();
+    of << std::endl;
     LOG_DEBUG << "bench done";
     //here we can close this
     exit(EXIT_SUCCESS);
