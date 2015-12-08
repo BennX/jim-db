@@ -10,6 +10,8 @@ namespace jimdb
     {
 #define MESSAGE_SIZE 8
 
+        int PollTask::m_counter = 0;
+
         PollTask::~PollTask() {}
 
         bool PollTask::continuous()
@@ -29,7 +31,7 @@ namespace jimdb
                 if (ec)
                 {
                     // cancle or close while in a operation of the socket..
-					// nice try watson!
+                    // nice try watson!
                     //m_socket->cancel();
                     //m_socket->shutdown(asio::ip::tcp::socket::shutdown_both);
                     //m_socket->close();
@@ -72,7 +74,7 @@ namespace jimdb
                         break;
                     case RECEIVE:
                         TaskQueue::getInstance().push_pack(std::make_shared<RequestTask>(m_socket,
-                                                           std::make_shared<network::Message>(l_buffer)));
+                                                           std::make_shared<network::Message>(l_buffer), std::make_shared<Bench>(m_counter++)));
                         break;
                     default:
                         break;

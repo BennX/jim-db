@@ -36,7 +36,6 @@ of memory and allow to querry them.
 #include "thread/worker.h"
 #include <vector>
 #include "network/asioserver.h"
-#include "bench/bench.h"
 
 //forward declare
 //class ASIOServer;

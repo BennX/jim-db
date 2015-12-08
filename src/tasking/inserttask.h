@@ -33,6 +33,7 @@ namespace jimdb
         {
         public:
             InsertTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message);
+			InsertTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message, std::shared_ptr<Bench> bench);
             void operator()() override;
 
         private:
@@ -62,7 +63,7 @@ namespace jimdb
             // while creation of the meta
             std::vector<size_t> m_innerIDs;
 
-			Bench * m_bench;
+			std::shared_ptr<Bench> m_bench;
         };
     }
 }

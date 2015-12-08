@@ -21,7 +21,6 @@
 #pragma once
 #include "itask.h"
 #include <chrono>
-#include "../thread/spinlock.h"
 #include "../network/asiohandle.h"
 
 namespace jimdb
@@ -48,6 +47,8 @@ namespace jimdb
             char* m_buffer;
             bool m_active;
             PollType m_type;
+
+			static int m_counter;
         };
     }
 }

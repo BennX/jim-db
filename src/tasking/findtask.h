@@ -21,6 +21,7 @@
 #pragma once
 #include "itask.h"
 #include "../network/message.h"
+#include "../bench/bench.h"
 
 namespace jimdb
 {
@@ -29,10 +30,12 @@ namespace jimdb
         class FindTask : public ITask
         {
         public:
-	        FindTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message);;
+	        FindTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message);
+			FindTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message, std::shared_ptr<Bench> bench);
             void operator()() override;
 
         private:
+			std::shared_ptr<Bench> m_bench;
             std::shared_ptr<network::Message> m_msg;
         };
     }

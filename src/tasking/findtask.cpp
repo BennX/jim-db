@@ -11,8 +11,12 @@ namespace jimdb
     {
 
         FindTask::FindTask(const std::shared_ptr<network::AsioHandle>& sock,
-                           const std::shared_ptr<network::Message>& message): ITask(sock),
+                           const std::shared_ptr<network::Message>& message): ITask(sock), m_bench(nullptr),
             m_msg(message) {}
+
+        FindTask::FindTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message,
+                           std::shared_ptr<Bench> bench) : ITask(sock),
+            m_bench(bench), m_msg(message) {}
 
         void FindTask::operator()()
         {

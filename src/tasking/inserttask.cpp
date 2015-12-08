@@ -8,6 +8,7 @@
 #include "../bench/bench.h"
 #include "taskqueue.h"
 #include "polltask.h"
+#include "../bench/benchmark.h"
 
 namespace jimdb
 {
@@ -16,10 +17,12 @@ namespace jimdb
 
         InsertTask::InsertTask(const std::shared_ptr<network::AsioHandle>& sock,
                                const std::shared_ptr<network::Message>& message): ITask(sock), m_msg(message)
-        {
-            m_bench = new Bench(m_socket->ID());
-        }
+        {}
 
+        InsertTask::InsertTask(const std::shared_ptr<network::AsioHandle>& sock,
+                               const std::shared_ptr<network::Message>& message,
+                               std::shared_ptr<Bench> bench) : ITask(sock), m_msg(message), m_bench(bench)
+        {}
 
         /**
         * Really importand to understand!!
@@ -63,9 +66,6 @@ namespace jimdb
             }
             //insert the obj to the page
             auto oid = l_page->insert(dat);
-
-
-            delete m_bench;//stop timing here
 
             //generate answer and return it
             *m_socket << network::MessageFactory().generateResultInsert(oid);
