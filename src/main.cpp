@@ -134,18 +134,38 @@ int main(int argc, char* argv[])
         threads = std::thread::hardware_concurrency() - 1; //since the mainthread
     }
 
-    LOG_INFO << "Starting: " << threads + 1 << " Workers";
-    std::vector<std::shared_ptr<jimdb::tasking::Worker>> m_workers;
+    LOG_INFO << "Starting: " << threads << " Workers";
+
+    //spawn the working threads
+    std::vector<std::thread> l_workers;
     for (unsigned int i = 0; i < threads; ++i)
     {
-        m_workers.push_back(std::make_shared<jimdb::tasking::Worker>(tasks));
+        l_workers.push_back(std::thread([]()
+        {
+            auto& l_task = jimdb::tasking::TaskQueue::getInstance();
+            while (true)
+            {
+                auto task = l_task.pop_front();
+                if (task)
+                    (*task)(); //execute the task
+                if (task->continuous())
+                    l_task.push_pack(task);
+            }
+        }));
     }
 
-
     jimdb::network::ASIOServer l_server;
+
     l_server.accept(false);
     //go into the asio service loop
     l_server.start();
+
+
+    //kill the workers
+    std::for_each(l_workers.begin(), l_workers.end(), [](std::thread & t)
+    {
+        t.join();
+    });
 
     LOG_ERROR << "This is bad we lost the io service and lost our loop.";
 }
