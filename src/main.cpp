@@ -135,10 +135,10 @@ int main(int argc, char* argv[])
     }
 
     LOG_INFO << "Starting: " << threads + 1 << " Workers";
-    std::vector<std::unique_ptr<jimdb::tasking::Worker>> m_workers;
-    for (unsigned int i = 0; i < std::thread::hardware_concurrency(); ++i)
+    std::vector<std::shared_ptr<jimdb::tasking::Worker>> m_workers;
+    for (unsigned int i = 0; i < threads; ++i)
     {
-        m_workers.push_back(std::make_unique<jimdb::tasking::Worker>(tasks));
+        m_workers.push_back(std::make_shared<jimdb::tasking::Worker>(tasks));
     }
 
 
