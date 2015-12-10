@@ -49,7 +49,7 @@ namespace jimdb
                     continue;
                 }
                 //check the others
-                if (!it->second->isLocked() && it->second->free(free))
+                if (it->second->free(free))
                 {
                     return it->second; //dont unlock when returned
                 }
