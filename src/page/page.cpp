@@ -94,25 +94,25 @@ namespace jimdb
 
         bool Page::full()
         {
-            std::lock_guard<tasking::SpinLock> lock(m_spin);
             return findHeaderPosition(false) == nullptr;
         }
 
         bool Page::free(const size_t& size)
         {
-            std::lock_guard<tasking::SpinLock> lock(m_spin);
-            if (!m_rwLock && find(size, false) != nullptr
-                    && findHeaderPosition(false) != nullptr)
+            if (!m_rwLock)
             {
-                m_rwLock.writeLock();
-                return true;
+                if (find(size, false) != nullptr
+                        && findHeaderPosition(false) != nullptr)
+                {
+                    m_rwLock.writeLock();
+                    return true;
+                }
             }
             return false;
         }
 
         size_t Page::insert(const rapidjson::GenericValue<rapidjson::UTF8<>>& value)
         {
-            std::lock_guard<tasking::SpinLock> lock(m_spin);
             //here we know this page has one chunk big enough to fitt the whole object
             //including its overhead! so start inserting it.
 
@@ -349,6 +349,7 @@ namespace jimdb
 
         void* Page::find(const size_t& size, bool aloc)
         {
+			std::lock_guard<tasking::SpinLock> lock(m_spin);
             //we cant fit it
             if (size >= m_freeSpace)
                 return nullptr;
@@ -535,6 +536,7 @@ namespace jimdb
 
         void* Page::findHeaderPosition(bool aloc)
         {
+            std::lock_guard<tasking::SpinLock> lock(m_spin);
             //we cant fit it
             if (sizeof(HeaderMetaData) > m_headerSpace)
                 return nullptr;

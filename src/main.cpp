@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
 
     //spawn the working threads
     std::vector<std::thread> l_workers;
-    for (unsigned int i = 0; i < threads; ++i)
+    for (auto i = 0; i < threads; ++i)
     {
         l_workers.push_back(std::thread([]()
         {
