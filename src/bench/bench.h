@@ -20,13 +20,16 @@
 // **/
 #pragma once
 #include <chrono>
+#include "benchmark.h"
 
 class Bench
 {
 public:
-	explicit Bench(const int& i);
-	~Bench();
+    explicit Bench();
+	void setType(const Benchmark::Type t);
+    ~Bench();
 private:
-	int m_id;
-	std::chrono::time_point<std::chrono::steady_clock> m_cycleStart;
+    int m_id;
+	Benchmark::Type m_type;
+    std::chrono::time_point<std::chrono::steady_clock> m_cycleStart;
 };

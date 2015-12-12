@@ -1,16 +1,24 @@
 #pragma once
 #include <iostream>
 #include "../thread/spinlock.h"
-#include <map>
+#include <vector>
 
 class Benchmark
 {
 public:
+
+    enum Type
+    {
+        INSERT, FIND
+    };
+
     static Benchmark& getInstance();
-    void init(const int count, const std::string& filename);
-    //@param[in] i the task id
+    Benchmark& init(const int count, const std::string& filename);
+    Benchmark& setType(const Type t);
+    //only add the type which get logged atm
+    //@param[in] t Type to add
     //@param[in] time the time in µs it took
-    void add(const int& i , const unsigned long long& time);
+    void add(const Type t, const unsigned long long& time);
     friend std::ostream& operator<<(std::ostream& os, Benchmark& obj);
 
 private:
@@ -18,10 +26,12 @@ private:
     ~Benchmark() {};
 
     jimdb::tasking::SpinLock m_spin;
-    std::map<int, unsigned long long> m_values;
+    std::vector<unsigned long long> m_values;
     int m_counter;
 
-	std::string m_filename;
-	int m_doneValue;
+    Type m_logType;
+
+    std::string m_filename;
+    int m_doneValue;
 };
 

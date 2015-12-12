@@ -9,37 +9,40 @@ Benchmark& Benchmark::getInstance()
     return instance;
 }
 
-void Benchmark::init(const int count, const std::string& filename)
+Benchmark& Benchmark::init(const int count, const std::string& filename)
 {
     m_doneValue = count;
     m_filename = filename;
+    return *this;
 }
 
-void Benchmark::add(const int& i, const unsigned long long& time)
+Benchmark& Benchmark::setType(const Type t)
+{
+    m_logType = t;
+    return *this;
+}
+
+void Benchmark::add(const Type t, const unsigned long long& time)
 {
     std::lock_guard<jimdb::tasking::SpinLock> lock(m_spin);
-    if(m_values.count(i))
+	//else we skip
+    if (t == m_logType)
     {
-        auto l_cur = m_values[i];
-        m_values[i] = l_cur + time;
+        m_values.push_back(time);
+        if (m_values.size() == m_doneValue)
+            LOG_DEBUG << *this;
     }
-    else
-    {
-        m_values[i] = time;
-        m_counter++;
-    }
-    if(m_values.size() == 1000000)
-        LOG_DEBUG << *this;
 }
 
-Benchmark::Benchmark(): m_counter(0), m_filename("bench.dat"), m_doneValue(1000000) {}
+Benchmark::Benchmark(): m_values(1000000), m_counter(0), m_logType(INSERT), m_filename("bench.dat"),
+    m_doneValue(1000000) {}
 
 std::ostream& operator<<(std::ostream& os, Benchmark& obj)
 {
     std::stringstream ss;
-    for(auto it = obj.m_values.begin(); it != obj.m_values.end(); ++it)
+    for (auto& value : obj.m_values)
     {
-        ss << ";" << it->second;
+        ss << ";" << value;
     }
     obj.m_values.clear();
 
