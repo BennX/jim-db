@@ -98,7 +98,7 @@ namespace jimdb
             @author Benjamin Meyer
             @date 02.11.2015 11:44
             */
-            std::shared_ptr<std::string> getJSONObject(const long long& headerpos);
+            std::shared_ptr<rapidjson::Document> getJSONObject(const long long& headerpos);
 
             bool deleteObj(const long long& headerpos);
 

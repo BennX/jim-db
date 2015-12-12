@@ -20,6 +20,9 @@ namespace jimdb
 
         void FindTask::operator()()
         {
+            if (m_bench != nullptr)
+                m_bench->setType(Benchmark::FIND);
+
             LOG_SCOPE_TIME << "Find and create";
             //optain the oid
             auto& l_data = (*m_msg)()["data"];
@@ -51,7 +54,7 @@ namespace jimdb
             //get/create the object
             auto l_obj = l_page->getJSONObject(l_meta.m_pos);
 
-            *m_socket << l_obj;
+            *m_socket << network::MessageFactory().generate(network::RESULT, *l_obj);
             TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
         }
     }

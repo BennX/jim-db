@@ -13,6 +13,7 @@ Benchmark& Benchmark::init(const int count, const std::string& filename)
 {
     m_doneValue = count;
     m_filename = filename;
+	m_values.reserve(m_doneValue);//prealocate
     return *this;
 }
 
@@ -25,7 +26,7 @@ Benchmark& Benchmark::setType(const Type t)
 void Benchmark::add(const Type t, const unsigned long long& time)
 {
     std::lock_guard<jimdb::tasking::SpinLock> lock(m_spin);
-	//else we skip
+    //else we skip
     if (t == m_logType)
     {
         m_values.push_back(time);
@@ -34,8 +35,11 @@ void Benchmark::add(const Type t, const unsigned long long& time)
     }
 }
 
-Benchmark::Benchmark(): m_values(1000000), m_counter(0), m_logType(INSERT), m_filename("bench.dat"),
-    m_doneValue(1000000) {}
+Benchmark::Benchmark(): m_counter(0), m_logType(INSERT), m_filename("bench.dat"),
+    m_doneValue(1000000)
+{
+    m_values.reserve(m_doneValue);//prealocate
+}
 
 std::ostream& operator<<(std::ostream& os, Benchmark& obj)
 {

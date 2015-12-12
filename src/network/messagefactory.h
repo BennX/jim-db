@@ -70,8 +70,8 @@ namespace jimdb
             @date 01.11.2015 09:42
             */
             std::shared_ptr<std::string> generateResultInsert(const uint64_t& oid);
+			std::shared_ptr<std::string> generate(const MessageTypes& t, rapidjson::Value& data);
         private:
-            std::shared_ptr<std::string> generate(const MessageTypes& t, rapidjson::Value& data);
             std::shared_ptr<std::string> toString(rapidjson::Value& data) const;
         };
     }

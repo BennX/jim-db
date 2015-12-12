@@ -143,7 +143,7 @@ namespace jimdb
         }
 
 
-        std::shared_ptr<std::string> Page::getJSONObject(const long long& headerpos)
+        std::shared_ptr<rapidjson::Document> Page::getJSONObject(const long long& headerpos)
         {
             //reading the Page
             tasking::RWLockGuard<> lock(m_rwLock, tasking::READ);
@@ -158,27 +158,23 @@ namespace jimdb
             auto& l_meta = l_metaIdx[l_objectType];
 
             //create the document
-            rapidjson::Document l_obj;
-            l_obj.SetObject();
+            auto l_obj = std::make_shared<rapidjson::Document>();
+            l_obj->SetObject();
 
             //now generate the inner part of the object
             rapidjson::Value l_value;
             l_value.SetObject();
             //calc the start id
             void* start = (static_cast<char*>(m_body) + l_header->getPos());
-            buildObject(l_objectType, start, l_value, l_obj.GetAllocator());
+            buildObject(l_objectType, start, l_value, l_obj->GetAllocator());
 
             //generate name
             auto l_objName = l_meta->getName();
-            rapidjson::Value l_name(l_objName.c_str(), l_objName.length(), l_obj.GetAllocator());
+            rapidjson::Value l_name(l_objName.c_str(), l_objName.length(), l_obj->GetAllocator());
             //now add the inner object
-            l_obj.AddMember(l_name, l_value, l_obj.GetAllocator());
+            l_obj->AddMember(l_name, l_value, l_obj->GetAllocator());
 
-            //convert to string
-            rapidjson::StringBuffer strbuf;
-            rapidjson::Writer<rapidjson::StringBuffer> writer(strbuf);
-            l_obj.Accept(writer);
-            return std::make_shared<std::string>(strbuf.GetString());
+            return l_obj;
         }
 
         bool Page::deleteObj(const long long& headerpos)
