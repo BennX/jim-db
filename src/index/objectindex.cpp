@@ -25,7 +25,10 @@ namespace jimdb
     namespace index
     {
         ObjectIndex ObjectIndex::m_instance;
-        ObjectIndex& ObjectIndex::getInstance()
+
+	    ObjectIndexValue::ObjectIndexValue() {}
+
+	    ObjectIndex& ObjectIndex::getInstance()
         {
             return m_instance;
         }

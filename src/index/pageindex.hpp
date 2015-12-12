@@ -34,7 +34,10 @@ namespace jimdb
 
         std::shared_ptr<memorymanagement::Page> PageIndex::find(const size_t& free)
         {
+			//write lock it since we meight delete something
             tasking::RWLockGuard<> lock(m_lock, tasking::WRITE);
+			if (m_freePages.empty())
+				return nullptr;
             //now find right but backwards
             for (auto it = m_freePages.rbegin(); it != m_freePages.rend();)
             {

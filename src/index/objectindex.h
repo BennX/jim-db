@@ -35,6 +35,9 @@ namespace jimdb
         class ObjectIndexValue
         {
         public:
+	        ObjectIndexValue();;
+            ObjectIndexValue(unsigned long long page, long long pos) : m_page(page), m_pos(pos)
+            {}
             long long m_page;
             //the position of the header object!
             //not of the object itself this meight change

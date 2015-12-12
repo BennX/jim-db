@@ -94,6 +94,8 @@ namespace jimdb
             @date 02.11.2015 11:55
             */
             inline stx::btree_map<KEY, VALUE>& get();
+
+			void print();
         protected:
             stx::btree_map<KEY, VALUE> m_index;
             tasking::RWLock m_lock;

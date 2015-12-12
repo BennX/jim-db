@@ -23,7 +23,6 @@ namespace jimdb
             if (m_bench != nullptr)
                 m_bench->setType(Benchmark::FIND);
 
-            LOG_SCOPE_TIME << "Find and create";
             //optain the oid
             auto& l_data = (*m_msg)()["data"];
             if(l_data.FindMember("oid__") == l_data.MemberEnd())
@@ -47,10 +46,11 @@ namespace jimdb
                 return;
             }
 
-            //get the meta information of the object
             auto& l_meta = index::ObjectIndex::getInstance()[l_oid];
+
             //get the page where the object is
             auto l_page = index::PageIndex::getInstance()[l_meta.m_page];
+
             //get/create the object
             auto l_obj = l_page->getJSONObject(l_meta.m_pos);
 

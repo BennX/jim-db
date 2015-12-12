@@ -103,7 +103,7 @@ namespace jimdb
             bool deleteObj(const long long& headerpos);
 
         private:
-            static long long m_objCount;
+            static std::atomic_ullong m_objCount;
             //const voidptr to memory to static cast as we like
             char* const m_header;
             char* const m_body;
@@ -137,7 +137,7 @@ namespace jimdb
             long long m_id;
 
             //id generation with static counter
-            static long long m_s_idCounter;
+            static std::atomic_ullong m_s_idCounter;
 
             //lock for getFree and so on
             tasking::RWLock m_rwLock;
@@ -250,4 +250,3 @@ namespace jimdb
         };
     }
 }
-#include "page.hpp"

@@ -36,6 +36,7 @@ of memory and allow to querry them.
 #include "thread/worker.h"
 #include <vector>
 #include "network/asioserver.h"
+#include "bench/benchmark.h"
 
 //forward declare
 //class ASIOServer;
@@ -55,7 +56,7 @@ void program_terminate()
 
 int main(int argc, char* argv[])
 {
-
+	Benchmark::getInstance().setType(Benchmark::FIND);
     std::set_terminate(program_terminate);
 
     //logger can be at init using the startup log

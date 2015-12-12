@@ -37,8 +37,10 @@ namespace jimdb
 {
     namespace memorymanagement
     {
-        long long Page::m_s_idCounter = 0;
-        long long Page::m_objCount = 0;
+        std::atomic_ullong Page::m_s_idCounter = 0;
+        std::atomic_ullong Page::m_objCount = 0;
+
+
         //take care order does matter here since header and body need to be init first to set the freepos values!
         Page::Page(long long header, long long body) : m_header(new char[header]), m_body(new char[body]), m_freeSpace(body),
             //set the freepos value ptr to the first header slot
@@ -68,7 +70,7 @@ namespace jimdb
         long long Page::getID()
         {
             tasking::RWLockGuard<> lock(m_rwLock, tasking::READ);
-            return m_s_idCounter;
+            return m_id;
         }
 
         void Page::setNext(const long long& id)
@@ -130,7 +132,7 @@ namespace jimdb
             //push the obj to obj index
             if (meta == nullptr)
                 return 0;
-            index::ObjectIndex::getInstance().add(meta->getOID(), {m_id, dist(m_header, meta)});
+            index::ObjectIndex::getInstance().add(meta->getOID(), index::ObjectIndexValue(this->m_id, dist(m_header, meta)));
             //done!
 
             m_rwLock.writeUnlock();
@@ -345,7 +347,7 @@ namespace jimdb
 
         void* Page::find(const size_t& size, bool aloc)
         {
-			std::lock_guard<tasking::SpinLock> lock(m_spin);
+            std::lock_guard<tasking::SpinLock> lock(m_spin);
             //we cant fit it
             if (size >= m_freeSpace)
                 return nullptr;

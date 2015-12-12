@@ -47,11 +47,11 @@ namespace jimdb
             @date 01.11.2015 11:33
             */
             inline std::shared_ptr<memorymanagement::Page> find(const size_t& free);
+
         private:
             PageIndex() {};
-
+			
             static PageIndex m_instance;
-
             stx::btree_map<size_t, std::shared_ptr<memorymanagement::Page>> m_freePages;
         };
     }

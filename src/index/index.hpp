@@ -57,18 +57,18 @@ namespace jimdb
         template <typename KEY, typename VALUE>
         inline const VALUE& Index<KEY, VALUE>::operator[](const KEY& name)
         {
-            tasking::RWLockGuard<> lock(m_lock, tasking::READ);
+            tasking::RWLockGuard<> lock(m_lock, tasking::WRITE);
             return m_index[name];
         }
 
-		/** // simply dont do this!
+        /** // simply dont do this!
         template <typename KEY, typename VALUE>
         inline const stx::btree_map<KEY, VALUE>& Index<KEY, VALUE>::get()
         {
             tasking::RWLockGuard<> lock(m_lock, tasking::READ);
             return m_index;
         }
-		*/
+        */
 
         template <typename KEY, typename VALUE>
         inline bool Index<KEY, VALUE>::empty()
@@ -77,11 +77,24 @@ namespace jimdb
             return m_index.empty();
         }
 
-	    template <typename T, typename U>
-	    stx::btree_map<typename Index<T, U>::KEY, typename Index<T, U>::VALUE>& Index<T, U>::get()
+        template <typename T, typename U>
+        stx::btree_map<typename Index<T, U>::KEY, typename Index<T, U>::VALUE>& Index<T, U>::get()
         {
-			tasking::RWLockGuard<> lock(m_lock, tasking::READ);
-			return m_index;
+            tasking::RWLockGuard<> lock(m_lock, tasking::READ);
+            return m_index;
+        }
+
+        template <typename T, typename U>
+        void Index<T, U>::print()
+        {
+            tasking::RWLockGuard<> lock(m_lock, tasking::READ);
+            std::stringstream ss;
+            for (auto it = m_index.begin();
+                    it != m_index.end(); ++it)
+            {
+                ss << ";" << it->first;
+            }
+            LOG_DEBUG << ss.str();
         }
     }
 }
