@@ -25,11 +25,27 @@
 #include <rapidjson/document.h>
 #include "../thread/rwlock.h"
 #include "../thread/spinlock.h"
+#include "../datatype/arrayitem.h"
 
+#define SC(T,X) static_cast<T>(X)
+#define DC(T,X) dynamic_cast<T>(X)
+#define RC(T,X) reinterpret_cast<T>(X)
 namespace jimdb
 {
     namespace memorymanagement
     {
+		typedef BaseType<size_t> SizeTType;
+		typedef BaseType<bool> BoolTyp;
+		typedef BaseType<size_t> ObjHashTyp;
+		typedef BaseType<int64_t> IntTyp;
+		typedef BaseType<double> DoubleTyp;
+
+		typedef ArrayItem<bool> ArrayBoolTyp;
+		typedef ArrayItem<size_t> ArrayObjHashTyp;
+		typedef ArrayItem<size_t> ArrayArrayCountTyp;
+		typedef ArrayItem<int64_t> ArrayIntTyp;
+		typedef ArrayItem<double> ArrayDoubleTyp;
+
         class HeaderMetaData;
 
         /**
