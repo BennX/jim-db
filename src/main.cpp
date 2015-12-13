@@ -50,7 +50,6 @@ void program_terminate()
     std::cerr << "error detected which is not handled by the main program" << std::endl;
     exit(EXIT_FAILURE);
 }
-#define JIMDB_WINDOWS
 
 int main(int argc, char* argv[])
 {
