@@ -19,24 +19,17 @@
 // ############################################################################
 // **/
 #pragma once
-#include "itask.h"
-#include "../network/message.h"
-#include "../bench/bench.h"
+#include <chrono>
+#include "benchmark.h"
 
-namespace jimdb
+class Bench
 {
-    namespace tasking
-    {
-        class FindTask : public ITask
-        {
-        public:
-	        FindTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message);
-			FindTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message, std::shared_ptr<Bench> bench);
-            void operator()() override;
-
-        private:
-			std::shared_ptr<Bench> m_bench;
-            std::shared_ptr<network::Message> m_msg;
-        };
-    }
-}
+public:
+    explicit Bench();
+	void setType(const Benchmark::Type t);
+    ~Bench();
+private:
+    int m_id;
+	Benchmark::Type m_type;
+    std::chrono::time_point<std::chrono::steady_clock> m_cycleStart;
+};

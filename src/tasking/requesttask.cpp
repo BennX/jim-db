@@ -24,15 +24,20 @@
 #include "taskqueue.h"
 #include "inserttask.h"
 #include "findtask.h"
+#include "../bench/bench.h"
+#include "../bench/benchmark.h"
 
 namespace jimdb
 {
     namespace tasking
     {
         RequestTask::RequestTask(const std::shared_ptr<network::AsioHandle>& sock,
-                                 const std::shared_ptr<network::Message> msg) : ITask(sock), m_msg(msg)
+                                 const std::shared_ptr<network::Message> msg) : ITask(sock), m_bench(nullptr), m_msg(msg)
         {}
 
+        RequestTask::RequestTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message> msg,
+                                 std::shared_ptr<Bench> bench) : ITask(sock), m_bench(bench), m_msg(msg)
+        {}
 
         void RequestTask::operator()()
         {
@@ -64,7 +69,7 @@ namespace jimdb
 
             if (doc["type"].GetString() == std::string("insert"))
             {
-                TaskQueue::getInstance().push_pack(std::make_shared<InsertTask>(m_socket, m_msg));
+                TaskQueue::getInstance().push_pack(std::make_shared<InsertTask>(m_socket, m_msg, m_bench));
                 return;
             }
 
@@ -80,7 +85,7 @@ namespace jimdb
 
             if (doc["type"].GetString() == std::string("find"))
             {
-                TaskQueue::getInstance().push_pack(std::make_shared<FindTask>(m_socket, m_msg));
+                TaskQueue::getInstance().push_pack(std::make_shared<FindTask>(m_socket, m_msg, m_bench));
                 return;
             }
 
