@@ -34,24 +34,28 @@ namespace jimdb
 {
     namespace memorymanagement
     {
-		typedef BaseType<size_t> SizeTType;
-		typedef BaseType<bool> BoolTyp;
-		typedef BaseType<size_t> ObjHashTyp;
-		typedef BaseType<int64_t> IntTyp;
-		typedef BaseType<double> DoubleTyp;
+        typedef uint64_t ID;
+        typedef ID OID;
 
-		typedef ArrayItem<bool> ArrayBoolTyp;
-		typedef ArrayItem<size_t> ArrayObjHashTyp;
-		typedef ArrayItem<size_t> ArrayArrayCountTyp;
-		typedef ArrayItem<int64_t> ArrayIntTyp;
-		typedef ArrayItem<double> ArrayDoubleTyp;
+        typedef BaseType<size_t> SizeTType;
+        typedef BaseType<bool> BoolTyp;
+        typedef BaseType<size_t> ObjHashTyp;
+        typedef BaseType<int64_t> IntTyp;
+        typedef BaseType<double> DoubleTyp;
+
+        typedef ArrayItem<bool> ArrayBoolTyp;
+        typedef ArrayItem<size_t> ArrayObjHashTyp;
+        typedef ArrayItem<size_t> ArrayArrayCountTyp;
+        typedef ArrayItem<int64_t> ArrayIntTyp;
+        typedef ArrayItem<double> ArrayDoubleTyp;
 
         class HeaderMetaData;
 
         /**
         \brief The page Class
 
-        It holds data and header information.
+        It holds data and header information. Moreover it does all the storage things,
+        from getting the Objekt into RAM to get it back out as JSON Doc
 
         @author Benjamin Meyer
         @date 23.10.2015 16:34
@@ -62,23 +66,6 @@ namespace jimdb
             Page(long long header, long long body);
             ~Page();
 
-            long long getID();
-            void setNext(const long long& id);
-            long long getNext() const;
-
-            long long free();
-
-            bool isLocked() const;
-
-            /**
-            \brief check if a page is full
-
-            @return true if the page is full.(no header pos)
-            @author Benjamin Meyer
-            @date 04.12.2015 10:47
-            */
-            bool full();
-
             /**
             \brief check if there is a chunk min size
 
@@ -87,7 +74,7 @@ namespace jimdb
             @author Benjamin Meyer
             @date 31.10.2015 13:29
             */
-            bool free(const size_t& size);
+            bool free(size_t size);
 
             /**
             \brief Insert a json obj to the page and checks for the meta data
@@ -105,7 +92,7 @@ namespace jimdb
             @author Benjamin Meyer
             @date 31.10.2015 14:54
             */
-            void setObjCounter(const long long& value) const;
+            void setObjCounter(long long value) const;
 
 
             /**
@@ -114,18 +101,63 @@ namespace jimdb
             @author Benjamin Meyer
             @date 02.11.2015 11:44
             */
-            std::shared_ptr<rapidjson::Document> getJSONObject(const long long& headerpos);
+            std::shared_ptr<rapidjson::Document> getJSONObject(long long headerpos);
 
-            bool deleteObj(const long long& headerpos);
+            /**
+            \brief Deltes an objekt by headoffset
+
+            @param[in] headerpos the position of the header
+            @return bool
+            @author Benjamin Meyer
+            @date 13.12.2015 09:39
+            */
+            bool deleteObj(long long headerpos);
+
+            /**
+            @return The page ID
+            @author Benjamin Meyer
+            @date 13.12.2015 09:38
+            */
+            long long getID();
+
+            /**
+            @return how much space is free on this page
+            @author Benjamin Meyer
+            @date 13.12.2015 09:38
+            */
+            long long free();
+
+            /**
+            \brief check if a page is full
+
+            @return true if the page is full.(no header pos)
+            @author Benjamin Meyer
+            @date 04.12.2015 10:47
+            */
+            bool full();
+
 
         private:
+			//holds the ID of the next page
+			long long m_id;
+
+			//id generation with static counter
+			static std::atomic_ullong m_s_idCounter;
+
+			//lock for getFree and so on
+			tasking::RWLock m_rwLock;
+
+			//lock for the free to be sure there is noone else checking right now
+			tasking::SpinLock m_spin;
+
             static std::atomic_ullong m_objCount;
+
             //const voidptr to memory to static cast as we like
             char* const m_header;
             char* const m_body;
 
             /**############################################
-            * private methods for body
+            * private Member for body
             * ############################################*/
 
             //pointer to the free typ chain start
@@ -136,30 +168,18 @@ namespace jimdb
             //it doesnt change so its const
             long long* const m_freepos;
 
+
             /**############################################
-            * private methods for header
+            * private Member for header
             * ############################################*/
 
             //offset to the next free header position
             //it doesnt change so its const too
             long long* const m_headerFreePos;
+            //how much space is free in ehader
             long long m_headerSpace;
             //Freetype of the header
             FreeType* m_headerFree;
-
-
-            //holds the ID of the next page
-            long long m_next;
-            long long m_id;
-
-            //id generation with static counter
-            static std::atomic_ullong m_s_idCounter;
-
-            //lock for getFree and so on
-            tasking::RWLock m_rwLock;
-
-            //lock for the free to be sure there is noone else checking right now
-            tasking::SpinLock m_spin;
 
             /**############################################
              * private methods for object
@@ -190,7 +210,7 @@ namespace jimdb
             @author Benjamin Meyer
             @date 04.11.2015 08:28
             */
-            void* find(const size_t& size, bool aloc = true);
+            void* find(size_t size, bool aloc = true);
 
             /**
             \brief Caluclate the distance between two pointers
@@ -215,7 +235,7 @@ namespace jimdb
             * private methods for header insert
             * ############################################*/
 
-            HeaderMetaData* insertHeader(const size_t& id, const size_t& hash, const size_t& type, const size_t& pos);
+            HeaderMetaData* insertHeader(size_t id, size_t hash, size_t type, size_t pos);
             /**
             \brief returns a header position, also used to check if we have a valid slot
             	just set aloc to false which is default true!
@@ -244,9 +264,9 @@ namespace jimdb
             @author Benjamin Meyer
             @date 02.11.2015 14:59
             */
-            void* buildObject(const size_t& hash, void* start, rapidjson::Value& toAdd, rapidjson::MemoryPoolAllocator<>& aloc);
+            void* buildObject(size_t hash, void* start, rapidjson::Value& toAdd, rapidjson::MemoryPoolAllocator<>& aloc);
 
-            void* buildArray(const long long& elemCount, void* start, rapidjson::Value& toAdd,
+            void* buildArray(long long elemCount, void* start, rapidjson::Value& toAdd,
                              rapidjson::MemoryPoolAllocator<>& aloc);
 
             /**
@@ -262,7 +282,7 @@ namespace jimdb
             @author Benjamin Meyer
             @date 30.11.2015 11:26
             */
-            void* deleteObj(const size_t& hash, void* start);
+            void* deleteObj(size_t hash, void* start);
         };
     }
 }

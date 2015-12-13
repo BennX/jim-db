@@ -38,12 +38,13 @@ namespace jimdb
 
 
         //take care order does matter here since header and body need to be init first to set the freepos values!
-        Page::Page(long long header, long long body) : m_header(new char[header]), m_body(new char[body]), m_freeSpace(body),
+        Page::Page(long long header, long long body) : m_id(++m_s_idCounter), m_header(new char[header]),
+            m_body(new char[body]),
             //set the freepos value ptr to the first header slot
-            m_freepos(new(static_cast<char*>(m_header)) long long(0)),
+            m_freeSpace(body),
             //set the header free pos ptr to the second  "long long" slot
-            m_headerFreePos(new(static_cast<char*>(m_header) + sizeof(long long)) long long(0)), m_next(0),
-            m_id(++m_s_idCounter)
+            m_freepos(new(static_cast<char*>(m_header)) long long(0)),
+            m_headerFreePos(new(static_cast<char*>(m_header) + sizeof(long long)) long long(0))
         {
             //because of m_freepos and m_headerFreePos
             m_headerSpace = header - 2 * sizeof(long long);
@@ -69,33 +70,19 @@ namespace jimdb
             return m_id;
         }
 
-        void Page::setNext(const long long& id)
-        {
-            m_next = id;
-        }
-
-        long long Page::getNext() const
-        {
-            return m_next;
-        }
-
         long long Page::free()
         {
             tasking::RWLockGuard<> lock(m_rwLock, tasking::READ);
             return m_freeSpace;
         }
 
-        bool Page::isLocked() const
-        {
-            return m_rwLock || m_spin;
-        }
 
         bool Page::full()
         {
             return findHeaderPosition(false) == nullptr;
         }
 
-        bool Page::free(const size_t& size)
+        bool Page::free(size_t size)
         {
             if (!m_rwLock)
             {
@@ -135,13 +122,13 @@ namespace jimdb
             return meta->getOID();
         }
 
-        void Page::setObjCounter(const long long& value) const
+        void Page::setObjCounter(long long value) const
         {
             m_objCount = value;
         }
 
 
-        std::shared_ptr<rapidjson::Document> Page::getJSONObject(const long long& headerpos)
+        std::shared_ptr<rapidjson::Document> Page::getJSONObject(long long headerpos)
         {
             //reading the Page
             tasking::RWLockGuard<> lock(m_rwLock, tasking::READ);
@@ -175,7 +162,7 @@ namespace jimdb
             return l_obj;
         }
 
-        bool Page::deleteObj(const long long& headerpos)
+        bool Page::deleteObj(long long headerpos)
         {
             //reading the Page
             tasking::RWLockGuard<> lock(m_rwLock, tasking::WRITE);
@@ -357,7 +344,7 @@ namespace jimdb
             return{ l_ret, l_pos };
         }
 
-        void* Page::find(const size_t& size, bool aloc)
+        void* Page::find(size_t size, bool aloc)
         {
             std::lock_guard<tasking::SpinLock> lock(m_spin);
             //we cant fit it
@@ -537,7 +524,7 @@ namespace jimdb
         }
 
 
-        HeaderMetaData* Page::insertHeader(const size_t& id, const size_t& hash, const size_t& type, const size_t& pos)
+        HeaderMetaData* Page::insertHeader(size_t id, size_t hash, size_t type, size_t pos)
         {
             //create the new header at the position of the first element returned
             auto l_meta = new(findHeaderPosition()) HeaderMetaData(id, hash, type, pos);
@@ -640,7 +627,7 @@ namespace jimdb
             return l_ret;
         }
 
-        void* Page::buildObject(const size_t& hash, void* start, rapidjson::Value& l_obj,
+        void* Page::buildObject(size_t hash, void* start, rapidjson::Value& l_obj,
                                 rapidjson::MemoryPoolAllocator<>& aloc)
         {
             //get the meta information of the object type
@@ -728,7 +715,7 @@ namespace jimdb
             return l_ptr;
         }
 
-        void* Page::buildArray(const long long& elemCount, void* start, rapidjson::Value& toAdd,
+        void* Page::buildArray(long long elemCount, void* start, rapidjson::Value& toAdd,
                                rapidjson::MemoryPoolAllocator<>& aloc)
         {
             ArrayItem<size_t>* l_element = static_cast<ArrayItem<size_t>*>(start);
@@ -791,7 +778,7 @@ namespace jimdb
         }
 
 
-        void* Page::deleteObj(const size_t& hash, void* start)
+        void* Page::deleteObj(size_t hash, void* start)
         {
             //get the meta data
             auto& l_meta = meta::MetaIndex::getInstance()[hash];
