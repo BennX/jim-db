@@ -22,15 +22,9 @@ namespace jimdb
 {
     namespace memorymanagement
     {
-        inline ArrayType::ArrayType(const size_t& s) : BaseType(s)
-        {
-        }
+        inline ArrayType::ArrayType(size_t s) : BaseType(s) {}
 
-        inline ArrayType::ArrayType(size_t& s) : BaseType(s)
-        {
-        }
-
-        inline size_t ArrayType::size()
+        inline size_t ArrayType::size() const
         {
             return m_data.data;
         }

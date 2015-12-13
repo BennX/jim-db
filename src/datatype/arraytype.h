@@ -36,9 +36,8 @@ namespace jimdb
         class ArrayType: public BaseType<size_t>
         {
         public:
-			explicit inline ArrayType(size_t& s);
-	        explicit inline ArrayType(const size_t& s);
-            inline size_t size();
+			explicit inline ArrayType(size_t s);
+            inline size_t size() const;
 		};
     }
 }

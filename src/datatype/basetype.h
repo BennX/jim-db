@@ -41,33 +41,30 @@ namespace jimdb
         {
         public:
             BaseType();
-            explicit BaseType(T& t);
-            explicit BaseType(const T& t);
+            explicit BaseType(T t);
 
             ~BaseType();
 
             //inlines not realy needed since the template forces inline
-            inline void setNext(const ptrdiff_t& next);
+            inline void setNext(ptrdiff_t next);
             inline std::ptrdiff_t getNext();
-            inline void setData(T& t);
-            inline void setData(const T& t);
+            inline void setData(T t);
             inline T getData() const;
 
         protected:
             union DataUnion
             {
                 T data;
-                std::ptrdiff_t size;
+                int64_t size;
 
                 DataUnion()
                 {
                     memset(this, 0, sizeof(DataUnion));
                 } //init with 0
-                explicit DataUnion(T& t);
-                explicit DataUnion(const T& t);
+                explicit DataUnion(T t);
             } m_data;
 
-			std::ptrdiff_t m_next;
+            std::ptrdiff_t m_next;
         };
 #include "BaseType.hpp"
     }

@@ -45,7 +45,7 @@ namespace jimdb
             /**
             @return the configValue as const char*
             */
-            static const char* get(const MessageTypes& e);
+            static const char* get(MessageTypes e);
         };
 
         /**

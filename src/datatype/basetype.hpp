@@ -20,25 +20,16 @@
 **/
 
 template <typename T>
-BaseType<T>::DataUnion::DataUnion(T& t)
+BaseType<T>::DataUnion::DataUnion(T t)
 {
     this->data = t;
 }
 
 template <typename T>
-BaseType<T>::DataUnion::DataUnion(const T& t)
-{
-    this->data = t;
-}
+BaseType<T>::BaseType() : m_data(), m_next(0) {}
 
 template <typename T>
-BaseType<T>::BaseType() :m_data(), m_next(0) {}
-
-template <typename T>
-BaseType<T>::BaseType(T& t) : m_data(t), m_next(0) {}
-
-template <typename T>
-BaseType<T>::BaseType(const T& t) : m_data(t), m_next(0) {}
+BaseType<T>::BaseType(T t) : m_data(t), m_next(0) {}
 
 template <typename T>
 BaseType<T>::~BaseType()
@@ -49,7 +40,7 @@ BaseType<T>::~BaseType()
 }
 
 template <typename T>
-void BaseType<T>::setNext(const ptrdiff_t& next)
+void BaseType<T>::setNext(ptrdiff_t next)
 {
     m_next = next;
 }
@@ -61,13 +52,7 @@ std::ptrdiff_t BaseType<T>::getNext()
 }
 
 template <typename T>
-void BaseType<T>::setData(T& t)
-{
-    m_data.data = t;
-}
-
-template <typename T>
-void BaseType<T>::setData(const T& t)
+void BaseType<T>::setData(T t)
 {
     m_data.data = t;
 }

@@ -21,9 +21,8 @@
 
 #pragma once
 #include "basetype.h"
-#include <string>
 #include <memory>
-
+#include <string>
 namespace jimdb
 {
     namespace memorymanagement
@@ -37,7 +36,7 @@ namespace jimdb
         \date 29.09.2015 10:45
         */
 
-        class StringType :public BaseType<long long>
+        class StringType : public BaseType<long long>
         {
         public:
             explicit inline StringType();
