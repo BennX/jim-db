@@ -37,7 +37,7 @@ namespace jimdb
 
         static_assert(sizeof(MessageTypeMap::EnumString) / sizeof(char*) == ENUM_SIZE, "size dont match!");
 
-        const char* MessageTypeMap::get(const MessageTypes& e)
+        const char* MessageTypeMap::get(MessageTypes e)
         {
             return EnumString[e];
         }

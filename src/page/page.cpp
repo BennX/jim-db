@@ -20,10 +20,6 @@
 **/
 
 #include "page.h"
-
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/prettywriter.h>
-
 #include "../assert.h"
 #include "../meta/metadata.h"
 #include "../meta/metaindex.h"
@@ -32,6 +28,7 @@
 #include "../datatype/arrayitem.h"
 #include "../datatype/arrayitemstring.h"
 #include "../datatype/arraytype.h"
+#include "../common/configuration.h"
 
 namespace jimdb
 {
@@ -42,12 +39,15 @@ namespace jimdb
 
 
         //take care order does matter here since header and body need to be init first to set the freepos values!
-        Page::Page(long long header, long long body) : m_header(new char[header]), m_body(new char[body]), m_freeSpace(body),
+        Page::Page(long long header, long long body) : m_id(++m_s_idCounter), m_header(new char[header]),
+            m_body(new char[body]),
+            m_pageClean(common::Configuration::getInstance()[common::PAGE_FRAGMENTATION_CLEAN].GetDouble()),
+            m_full(common::Configuration::getInstance()[common::PAGE_FULL_VALUE].GetInt64()),
             //set the freepos value ptr to the first header slot
-            m_freepos(new(static_cast<char*>(m_header)) long long(0)),
+            m_freeSpace(body),
             //set the header free pos ptr to the second  "long long" slot
-            m_headerFreePos(new(static_cast<char*>(m_header) + sizeof(long long)) long long(0)), m_next(0),
-            m_id(++m_s_idCounter)
+            m_freepos(new(static_cast<char*>(m_header)) long long(0)),
+            m_headerFreePos(new(static_cast<char*>(m_header) + sizeof(long long)) long long(0))
         {
             //because of m_freepos and m_headerFreePos
             m_headerSpace = header - 2 * sizeof(long long);
@@ -73,33 +73,19 @@ namespace jimdb
             return m_id;
         }
 
-        void Page::setNext(const long long& id)
-        {
-            m_next = id;
-        }
-
-        long long Page::getNext() const
-        {
-            return m_next;
-        }
-
         long long Page::free()
         {
             tasking::RWLockGuard<> lock(m_rwLock, tasking::READ);
             return m_freeSpace;
         }
 
-        bool Page::isLocked() const
-        {
-            return m_rwLock || m_spin;
-        }
 
         bool Page::full()
         {
-            return findHeaderPosition(false) == nullptr;
+            return findHeaderPosition(false) == nullptr || m_freeSpace < m_full;
         }
 
-        bool Page::free(const size_t& size)
+        bool Page::free(size_t size)
         {
             if (!m_rwLock)
             {
@@ -139,13 +125,13 @@ namespace jimdb
             return meta->getOID();
         }
 
-        void Page::setObjCounter(const long long& value) const
+        void Page::setObjCounter(long long value) const
         {
             m_objCount = value;
         }
 
 
-        std::shared_ptr<rapidjson::Document> Page::getJSONObject(const long long& headerpos)
+        std::shared_ptr<rapidjson::Document> Page::getJSONObject(long long headerpos)
         {
             //reading the Page
             tasking::RWLockGuard<> lock(m_rwLock, tasking::READ);
@@ -179,7 +165,7 @@ namespace jimdb
             return l_obj;
         }
 
-        bool Page::deleteObj(const long long& headerpos)
+        bool Page::deleteObj(long long headerpos)
         {
             //reading the Page
             tasking::RWLockGuard<> lock(m_rwLock, tasking::WRITE);
@@ -246,21 +232,27 @@ namespace jimdb
                     case rapidjson::kFalseType:
                     case rapidjson::kTrueType:
                         {
-                            l_pos = find(sizeof(BaseType<bool>));
+                            l_pos = find(sizeof(BoolTyp));
 
-                            void* l_new = new (l_pos) BaseType<bool>(it->value.GetBool());
+                            void* l_new = new (l_pos) BoolTyp(it->value.GetBool());
 
                             if (l_prev != nullptr)
                                 l_prev->setNext(dist(l_prev, l_new));
+                            //set the ret pointer
+                            if (l_ret == nullptr)
+                                l_ret = l_pos;
                         }
                         break;
                     case rapidjson::kObjectType:
                         {
                             //pos for the obj id
                             //and insert the ID of the obj
-                            l_pos = find(sizeof(BaseType<size_t>));
+                            l_pos = find(sizeof(ObjHashTyp));
                             std::string name = it->name.GetString();
-                            void* l_new = new (l_pos) BaseType<size_t>(common::FNVHash()(name));
+                            auto hash = common::FNVHash()(name);
+                            void* l_new = new (l_pos) ObjHashTyp(hash);
+
+
 
                             if (l_prev != nullptr)
                                 l_prev->setNext(dist(l_prev, l_new));
@@ -270,7 +262,11 @@ namespace jimdb
                             // the second contains the last element inserted
                             // l_pos current contains the last inserted element and get set to the
                             // last element of the obj we insert
-                            l_pos = (insertObject(it->value, reinterpret_cast<BaseType<size_t>*>(l_new)).second);
+                            l_pos = insertObject(it->value, RC(SizeTType*, l_new)).second;
+
+                            //set the ret pointer
+                            if (l_ret == nullptr)
+                                l_ret = l_new;
                         }
                         break;
 
@@ -286,9 +282,13 @@ namespace jimdb
                             //update prev
                             if (l_prev != nullptr)
                                 l_prev->setNext(dist(l_prev, l_new));
-                            //insert elements
 
-                            l_pos = insertArray(it->value, static_cast<BaseType<size_t>*>(l_new));
+                            //insert elements
+                            l_pos = insertArray(it->value, SC(SizeTType*, l_new));
+
+                            //set the ret pointer
+                            if (l_ret == nullptr)
+                                l_ret = l_new;
 
                         }
                         break;
@@ -304,6 +304,9 @@ namespace jimdb
                             auto* l_new = new (l_pos) StringType(it->value.GetString());
                             if (l_prev != nullptr)
                                 l_prev->setNext(dist(l_prev, l_new));
+                            //set the ret pointer
+                            if (l_ret == nullptr)
+                                l_ret = l_pos;
                         }
                         break;
 
@@ -312,40 +315,39 @@ namespace jimdb
                             //doesnt matter since long long and double are equal on
                             // x64
                             //find pos where the string fits
-                            l_pos = find(sizeof(BaseType<long long>));
+                            l_pos = find(sizeof(IntTyp));
 
                             void* l_new;
                             if (it->value.IsInt())
                             {
                                 //insert INT
-                                l_new = new (l_pos) BaseType<long long>(it->value.GetInt64());
+                                l_new = new (l_pos) IntTyp(it->value.GetInt64());
                             }
                             else
                             {
                                 //INSERT DOUBLE
-                                l_new = new (l_pos) BaseType<double>(it->value.GetDouble());
+                                l_new = new (l_pos) DoubleTyp(it->value.GetDouble());
                             }
                             if (l_prev != nullptr)
                                 l_prev->setNext(dist(l_prev, l_new));
+
+                            //set the ret pointer
+                            if (l_ret == nullptr)
+                                l_ret = l_pos;
                         }
                         break;
                     default:
                         LOG_WARN << "Unknown member Type: " << it->name.GetString() << ":" << it->value.GetType();
                         continue;
                 }
-                //so first element is set now, store it to return it.
-                if(l_ret == nullptr)
-                {
-                    l_ret = l_pos;
-                }
                 //prev is the l_pos now so cast it to this;
-                l_prev = reinterpret_cast<BaseType<size_t>*>(l_pos);
+                l_prev = RC(SizeTType*, l_pos);
             }
             //if we get here its in!
             return{ l_ret, l_pos };
         }
 
-        void* Page::find(const size_t& size, bool aloc)
+        void* Page::find(size_t size, bool aloc)
         {
             std::lock_guard<tasking::SpinLock> lock(m_spin);
             //we cant fit it
@@ -377,9 +379,9 @@ namespace jimdb
                     //else it does not fit and we need to go to the next
 
                     l_prev = l_freePtr;//set the previous
-                    auto l_temp = reinterpret_cast<char*>(l_freePtr);
+                    auto l_temp = RC(char*, l_freePtr);
                     l_temp += l_freePtr->getNext();
-                    l_freePtr = reinterpret_cast<FreeType*>(l_temp);
+                    l_freePtr = RC(FreeType*, l_temp);
                     continue;
                 }
                 //if we get here we have no space for that!
@@ -398,7 +400,7 @@ namespace jimdb
                     {
                         //if prev is null we have the start
                         //so update the m_free ptr
-                        m_free = reinterpret_cast<FreeType*>(reinterpret_cast<char*>(l_ret) + l_ret->getNext());
+                        m_free = RC(FreeType*, RC(char*, l_ret) + l_ret->getNext());
                     }
                     else
                     {
@@ -420,13 +422,13 @@ namespace jimdb
                     //check if we had the head if so update it
                     if (l_prev == nullptr)
                     {
-                        m_free = new(reinterpret_cast<char*>(l_ret) + size) FreeType(l_ret->getFree() - size);
+                        m_free = new(RC(char*, l_ret) + size) FreeType(l_ret->getFree() - size);
                         *m_freepos = dist(m_body, m_free);
                         m_free->setNext(dist(m_free, l_ret) + l_next);
                     }
                     else
                     {
-                        auto l_newF = new(reinterpret_cast<char*>(l_ret) + size) FreeType(l_ret->getFree() - size);
+                        auto l_newF = new(RC(char*, l_ret) + size) FreeType(l_ret->getFree() - size);
                         //next is relativ to the l_ret and of that the next soo...
                         l_newF->setNext(dist(l_newF, l_ret) + l_next);
                         //update the prev
@@ -461,9 +463,9 @@ namespace jimdb
                             //doesnt matter since long long and double are equal on
                             // x64
                             //find pos where the string fits
-                            l_pos = find(sizeof(ArrayItem<bool>));
+                            l_pos = find(sizeof(ArrayBoolTyp));
 
-                            void* l_new = new (l_pos) ArrayItem<bool>(arrayIt->GetBool(), BOOL);
+                            void* l_new = new (l_pos) ArrayBoolTyp(arrayIt->GetBool(), BOOL);
 
                             if (l_prev != nullptr)
                                 l_prev->setNext(dist(l_prev, l_new));
@@ -473,12 +475,12 @@ namespace jimdb
                         break;
                     case rapidjson::kArrayType:
                         {
-                            l_pos = find(sizeof(ArrayItem<size_t>));
+                            l_pos = find(sizeof(ArrayArrayCountTyp));
                             //add the number of elements
-                            void* l_new = new(l_pos) ArrayItem<size_t>(arrayIt->Size(), ARRAY);
+                            void* l_new = new(l_pos) ArrayArrayCountTyp(arrayIt->Size(), ARRAY);
                             if (l_prev != nullptr)
                                 l_prev->setNext(dist(l_prev, l_new));
-                            l_pos = insertArray(*arrayIt, static_cast<BaseType<size_t>*>(l_pos));
+                            l_pos = insertArray(*arrayIt, SC(SizeTType*, l_pos));
                         }
                         break;
                     case rapidjson::kStringType:
@@ -497,18 +499,18 @@ namespace jimdb
                             //doesnt matter since long long and double are equal on
                             // x64
                             //find pos where the string fits
-                            l_pos = find(sizeof(ArrayItem<long long>));
+                            l_pos = find(sizeof(ArrayIntTyp));
 
                             void* l_new;
                             if (arrayIt->IsInt())
                             {
                                 //insert INT
-                                l_new = new (l_pos) ArrayItem<long long>(arrayIt->GetInt64(), INT);
+                                l_new = new (l_pos) ArrayIntTyp(arrayIt->GetInt64(), INT);
                             }
                             else
                             {
                                 //INSERT DOUBLE
-                                l_new = new (l_pos) ArrayItem<double>(arrayIt->GetDouble(), DOUBLE);
+                                l_new = new (l_pos)	ArrayDoubleTyp(arrayIt->GetDouble(), DOUBLE);
                             }
 
                             if (l_prev != nullptr)
@@ -525,7 +527,7 @@ namespace jimdb
         }
 
 
-        HeaderMetaData* Page::insertHeader(const size_t& id, const size_t& hash, const size_t& type, const size_t& pos)
+        HeaderMetaData* Page::insertHeader(size_t id, size_t hash, size_t type, size_t pos)
         {
             //create the new header at the position of the first element returned
             auto l_meta = new(findHeaderPosition()) HeaderMetaData(id, hash, type, pos);
@@ -628,7 +630,7 @@ namespace jimdb
             return l_ret;
         }
 
-        void* Page::buildObject(const size_t& hash, void* start, rapidjson::Value& l_obj,
+        void* Page::buildObject(size_t hash, void* start, rapidjson::Value& l_obj,
                                 rapidjson::MemoryPoolAllocator<>& aloc)
         {
             //get the meta information of the object type
@@ -716,7 +718,7 @@ namespace jimdb
             return l_ptr;
         }
 
-        void* Page::buildArray(const long long& elemCount, void* start, rapidjson::Value& toAdd,
+        void* Page::buildArray(long long elemCount, void* start, rapidjson::Value& toAdd,
                                rapidjson::MemoryPoolAllocator<>& aloc)
         {
             ArrayItem<size_t>* l_element = static_cast<ArrayItem<size_t>*>(start);
@@ -779,7 +781,7 @@ namespace jimdb
         }
 
 
-        void* Page::deleteObj(const size_t& hash, void* start)
+        void* Page::deleteObj(size_t hash, void* start)
         {
             //get the meta data
             auto& l_meta = meta::MetaIndex::getInstance()[hash];

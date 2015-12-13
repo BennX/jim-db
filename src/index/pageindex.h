@@ -50,7 +50,9 @@ namespace jimdb
 
         private:
             PageIndex() {};
-			
+
+	        tasking::SpinLock m_findSpin;
+
             static PageIndex m_instance;
             stx::btree_map<size_t, std::shared_ptr<memorymanagement::Page>> m_freePages;
         };

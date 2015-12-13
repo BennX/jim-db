@@ -24,10 +24,10 @@ namespace jimdb
     namespace memorymanagement
     {
 
-        inline HeaderMetaData::HeaderMetaData(const size_t& id, const size_t& hash, const size_t& type,
-                                              const size_t& pos): m_oid(id), m_hash(hash), m_objektType(type), m_pos(pos) {}
-        
-		inline HeaderMetaData::~HeaderMetaData()
+        inline HeaderMetaData::HeaderMetaData(size_t id, size_t hash, size_t type, size_t pos): m_oid(id), m_hash(hash),
+            m_objektType(type), m_pos(pos) {}
+
+        inline HeaderMetaData::~HeaderMetaData()
         {
             //set everything to 0 on delete;
             m_oid = 0;

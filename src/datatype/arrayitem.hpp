@@ -20,13 +20,10 @@
 // **/
 
 template <typename T>
-ArrayItem<T>::ArrayItem(T& t, const ETypes& e): BaseType<T>(t), m_type(e)
+ArrayItem<T>::ArrayItem(T t, ETypes e): BaseType<T>(t), m_type(e)
 {
 }
-template <typename T>
-ArrayItem<T>::ArrayItem(const T& t, const ETypes& e) : BaseType<T>(t), m_type(e)
-{
-}
+
 
 template<typename T>
 inline ETypes ArrayItem<T>::getType() const
@@ -35,7 +32,7 @@ inline ETypes ArrayItem<T>::getType() const
 }
 
 template<typename T>
-inline void ArrayItem<T>::setType(const ETypes& e)
+inline void ArrayItem<T>::setType(ETypes e)
 {
     m_type = e;
 }

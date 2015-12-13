@@ -52,4 +52,3 @@ namespace jimdb
         };
     }
 }
-#include "polltask.hpp"

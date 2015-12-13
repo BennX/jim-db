@@ -22,10 +22,6 @@
 #include "configuration.h"
 #include <fstream>
 #include "../log/logger.h"
-#include <algorithm>
-#include <cctype>
-#include "assert.h"
-#include <iostream>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/PrettyWriter.h>
 
@@ -45,12 +41,14 @@ namespace jimdb
             "max_tasks",
             "page_header",
             "page_body",
+            "page_full_value",
+            "page_fragmentation_clean"
         };
 
         //check if valid numer must be the size of the enum!
         static_assert(sizeof(ConfigValuesMap::EnumString) / sizeof(char*) == SIZE_OF_ENUM, "size dont match!");
 
-        const char* ConfigValuesMap::get(const ConfigValues& e)
+        const char* ConfigValuesMap::get(ConfigValues e)
         {
             return EnumString[e];
         }
@@ -90,11 +88,12 @@ namespace jimdb
             check(LOG_FILE);
             check(LOG_LEVEL);
             check(THREADS); //0 means take system default
-			check(IP);
+            check(IP);
             check(PORT);
             check(MAX_TASKS);
             check(PAGE_HEADER);
             check(PAGE_BODY);
+            check(PAGE_FULL_VALUE);
             return true;
         }
 
@@ -121,8 +120,8 @@ namespace jimdb
             name.SetString(ConfigValuesMap::get(THREADS), alloc);
             doc.AddMember(name, 0, doc.GetAllocator());
 
-			name.SetString(ConfigValuesMap::get(IP), alloc);
-			doc.AddMember(name, "localhost", doc.GetAllocator());
+            name.SetString(ConfigValuesMap::get(IP), alloc);
+            doc.AddMember(name, "localhost", doc.GetAllocator());
 
             name.SetString(ConfigValuesMap::get(PORT), alloc);
             doc.AddMember(name, 6060, doc.GetAllocator());
@@ -137,6 +136,12 @@ namespace jimdb
             //16Kib
             name.SetString(ConfigValuesMap::get(PAGE_BODY), alloc);
             doc.AddMember(name, 16384, doc.GetAllocator());
+
+            name.SetString(ConfigValuesMap::get(PAGE_FULL_VALUE), alloc);
+            doc.AddMember(name, 250, doc.GetAllocator());
+
+            name.SetString(ConfigValuesMap::get(PAGE_FRAGMENTATION_CLEAN), alloc);
+            doc.AddMember(name, 0.1f , doc.GetAllocator());
 
             rapidjson::StringBuffer strbuf;
             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);

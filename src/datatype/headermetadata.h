@@ -32,9 +32,9 @@ namespace jimdb
         class HeaderMetaData
         {
         public:
-            inline HeaderMetaData(const size_t& id, const size_t& hash, const size_t& type, const size_t& pos);
+            inline HeaderMetaData(size_t id, size_t hash, size_t type, size_t pos);
             /**
-			Dtor which set everything to 0 "kind of clean".
+            Dtor which set everything to 0 "kind of clean".
             @author Benjamin Meyer
             @date 23.10.2015 15:29
             */

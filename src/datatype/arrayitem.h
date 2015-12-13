@@ -60,8 +60,7 @@ namespace jimdb
             @author Benjamin Meyer
             @date 28.10.2015 17:59
             */
-	        explicit ArrayItem(T& t, const ETypes& e);
-            explicit ArrayItem(const T& t, const ETypes& e);
+	        explicit ArrayItem(T t, ETypes e);
             inline ETypes getType() const;
 
             /**
@@ -71,7 +70,7 @@ namespace jimdb
             @author Benjamin Meyer
             @date 28.10.2015 17:52
             */
-            inline void setType(const ETypes& type);
+            inline void setType(ETypes type);
         private:
             ETypes m_type;
         };

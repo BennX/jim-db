@@ -42,6 +42,8 @@ namespace jimdb
             MAX_TASKS,
             PAGE_HEADER,
             PAGE_BODY,
+			PAGE_FULL_VALUE,
+			PAGE_FRAGMENTATION_CLEAN,
             SIZE_OF_ENUM,
         };
 
@@ -56,7 +58,7 @@ namespace jimdb
             /**
             @return the configValue as const char*
             */
-            static const char* get(const ConfigValues& e);
+            static const char* get(ConfigValues e);
         };
 
         /**
