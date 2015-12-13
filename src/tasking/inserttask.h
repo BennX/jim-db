@@ -20,7 +20,6 @@
 // **/
 #pragma once
 #include <vector>
-#include "../bench/bench.h"
 #include "itask.h"
 #include "../network/message.h"
 #include "../network/asiohandle.h"
@@ -33,7 +32,6 @@ namespace jimdb
         {
         public:
             InsertTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message);
-			InsertTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message, std::shared_ptr<Bench> bench);
             void operator()() override;
 
         private:
@@ -62,8 +60,6 @@ namespace jimdb
             //vector of inner object ids which get insterted
             // while creation of the meta
             std::vector<size_t> m_innerIDs;
-
-			std::shared_ptr<Bench> m_bench;
         };
     }
 }
