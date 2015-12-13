@@ -154,8 +154,12 @@ namespace jimdb
             l_value.SetObject();
             //calc the start id
             void* start = (static_cast<char*>(m_body) + l_header->getPos());
-            buildObject(l_objectType, start, l_value, l_obj->GetAllocator());
-
+            auto temp = buildObject(l_objectType, start, l_value, l_obj->GetAllocator());
+			if(temp == nullptr)
+			{
+				LOG_WARN << "build failed id: " << l_header->getOID();
+				return nullptr;
+			}
             //generate name
             auto l_objName = l_meta->getName();
             rapidjson::Value l_name(l_objName.c_str(), l_objName.length(), l_obj->GetAllocator());
@@ -318,7 +322,7 @@ namespace jimdb
                             l_pos = find(sizeof(IntTyp));
 
                             void* l_new;
-                            if (it->value.IsInt())
+                            if (it->value.IsInt() || it->value.IsInt64())
                             {
                                 //insert INT
                                 l_new = new (l_pos) IntTyp(it->value.GetInt64());
@@ -636,6 +640,7 @@ namespace jimdb
             //get the meta information of the object type
             //to build it
             auto& l_metaIdx = meta::MetaIndex::getInstance();
+
             //get the meta dataset
             auto& l_meta = l_metaIdx[hash];
 
@@ -652,7 +657,7 @@ namespace jimdb
                 {
                     case meta::OBJECT:
                         {
-                            auto l_data = static_cast<BaseType<size_t>*>(l_ptr);
+                            auto l_data = SC(ObjHashTyp*, l_ptr);
                             //get the hash to optain the metadata
                             auto l_hash = l_data->getData();
                             //set to object and create the inner object
@@ -660,52 +665,51 @@ namespace jimdb
 
                             //get the start pointer which is the "next" element
                             //and call recursive
-                            l_ptr = static_cast<BaseType<size_t>*>(buildObject(l_hash,
-                                                                   (reinterpret_cast<char*>(l_data) + l_data->getNext()), l_value, aloc));
+                            l_ptr = SC(SizeTType*, buildObject(l_hash, RC(char*, l_data) + l_data->getNext(), l_value, aloc));
                         }
                         break;
                     case meta::ARRAY:
                         {
                             l_value.SetArray();
-                            auto l_data = static_cast<ArrayType*>(l_ptr);
+                            auto l_data = SC(ArrayType*, l_ptr);
                             //get the hash to optain the metadata
                             auto l_size = l_data->size();
-                            l_ptr = buildArray(l_size, static_cast<char*>(l_ptr) + l_data->getNext(), l_value, aloc);
+                            l_ptr = buildArray(l_size, SC(char*, l_ptr) + l_data->getNext(), l_value, aloc);
                         }
                         break;
                     case meta::INT:
                         {
                             //create the data
-                            auto l_data = static_cast<BaseType<long long>*>(l_ptr);
+                            auto l_data = SC(IntTyp*, l_ptr);
                             //with length attribute it's faster ;)
                             l_value = l_data->getData();
-                            l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
+                            l_ptr = SC(char*, l_ptr) + SC(SizeTType*, l_ptr)->getNext();
                         }
                         break;
                     case meta::DOUBLE:
                         {
                             //create the data
-                            auto l_data = static_cast<BaseType<double>*>(l_ptr);
+                            auto l_data = SC(DoubleTyp*, l_ptr);
                             //with length attribute it's faster ;)
                             l_value = l_data->getData();
-                            l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
+                            l_ptr = SC(char*, l_ptr) + SC(SizeTType*, l_ptr)->getNext();
                         }
                         break;
                     case meta::STRING:
                         {
                             //create the data
-                            auto l_data = static_cast<StringType*>(l_ptr);
+                            auto l_data = SC(StringType*, l_ptr);
                             //with length attribute it's faster
                             l_value.SetString(l_data->getString()->c_str(), l_data->getString()->length(), aloc);
-                            l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
+                            l_ptr = SC(char*, l_ptr) + SC(SizeTType*, l_ptr)->getNext();
                         }
                         break;
                     case meta::BOOL:
                         {
                             //create the data
-                            auto l_data = static_cast<BaseType<bool>*>(l_ptr);
+                            auto l_data = SC(BoolTyp*, l_ptr);
                             l_value = l_data->getData();
-                            l_ptr = static_cast<char*>(l_ptr) + static_cast<BaseType<size_t>*>(l_ptr)->getNext();
+                            l_ptr = SC(char*, l_ptr) + SC(SizeTType*, l_ptr)->getNext();
                         }
                         break;
                     default:

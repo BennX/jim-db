@@ -32,8 +32,8 @@ namespace jimdb
         */
         void InsertTask::operator()()
         {
-			if (m_bench != nullptr)
-				m_bench->setType(Benchmark::INSERT);
+            if (m_bench != nullptr)
+                m_bench->setType(Benchmark::INSERT);
             //insert into page
             //we already know that its a valid data and valid document here!
             auto& dat = (*m_msg)()["data"];
@@ -136,7 +136,7 @@ namespace jimdb
                         {
                             if (!l_metaExsist)
                             {
-                                if (it->value.IsInt())
+                                if (it->value.IsInt() || it->value.IsInt64())
                                     newMeta->push_back({ it->name.GetString(), meta::INT }); //number
                                 else
                                     newMeta->push_back({ it->name.GetString(), meta::DOUBLE });//floatingpoint
