@@ -24,7 +24,7 @@ namespace jimdb
     {
         void PageIndex::add(const KEY& k, const VALUE& type)
         {
-            tasking::RWLockGuard<> lock(m_lock, tasking::WRITE);
+            std::lock_guard<tasking::SpinLock> lock(m_findSpin);
             m_index[k] = type;//at to regular index
 
             //insert into the "last idx"
@@ -34,10 +34,10 @@ namespace jimdb
 
         std::shared_ptr<memorymanagement::Page> PageIndex::find(const size_t& free)
         {
-			//write lock it since we meight delete something
-            tasking::RWLockGuard<> lock(m_lock, tasking::WRITE);
-			if (m_freePages.empty())
-				return nullptr;
+            //write lock it since we meight delete something
+            std::lock_guard<tasking::SpinLock> lock(m_findSpin);
+            if (m_freePages.empty())
+                return nullptr;
             //now find right but backwards
             for (auto it = m_freePages.rbegin(); it != m_freePages.rend();)
             {
@@ -56,8 +56,8 @@ namespace jimdb
                 {
                     return it->second; //dont unlock when returned
                 }
-				//increment here
-				++it;
+                //increment here
+                ++it;
             }
             return nullptr;
         }

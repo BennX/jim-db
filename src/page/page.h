@@ -138,23 +138,31 @@ namespace jimdb
 
 
         private:
-			//holds the ID of the next page
-			long long m_id;
+            //holds the ID of the next page
+            long long m_id;
 
-			//id generation with static counter
-			static std::atomic_ullong m_s_idCounter;
+            //id generation with static counter
+            static std::atomic_ullong m_s_idCounter;
 
-			//lock for getFree and so on
-			tasking::RWLock m_rwLock;
+            //lock for getFree and so on
+            tasking::RWLock m_rwLock;
 
-			//lock for the free to be sure there is noone else checking right now
-			tasking::SpinLock m_spin;
+            //lock for the free to be sure there is noone else checking right now
+            tasking::SpinLock m_spin;
 
             static std::atomic_ullong m_objCount;
 
             //const voidptr to memory to static cast as we like
             char* const m_header;
             char* const m_body;
+
+            //float value when the page need to be cleaned if its
+            //Fragmentation is above
+            float m_pageClean;
+
+            //the minimum value that need to be free on a page
+            //to not be full
+            int64_t m_full;
 
             /**############################################
             * private Member for body

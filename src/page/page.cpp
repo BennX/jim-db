@@ -28,6 +28,7 @@
 #include "../datatype/arrayitem.h"
 #include "../datatype/arrayitemstring.h"
 #include "../datatype/arraytype.h"
+#include "../common/configuration.h"
 
 namespace jimdb
 {
@@ -40,6 +41,8 @@ namespace jimdb
         //take care order does matter here since header and body need to be init first to set the freepos values!
         Page::Page(long long header, long long body) : m_id(++m_s_idCounter), m_header(new char[header]),
             m_body(new char[body]),
+            m_pageClean(common::Configuration::getInstance()[common::PAGE_FRAGMENTATION_CLEAN].GetDouble()),
+            m_full(common::Configuration::getInstance()[common::PAGE_FULL_VALUE].GetInt64()),
             //set the freepos value ptr to the first header slot
             m_freeSpace(body),
             //set the header free pos ptr to the second  "long long" slot
@@ -79,7 +82,7 @@ namespace jimdb
 
         bool Page::full()
         {
-            return findHeaderPosition(false) == nullptr;
+            return findHeaderPosition(false) == nullptr || m_freeSpace < m_full;
         }
 
         bool Page::free(size_t size)
