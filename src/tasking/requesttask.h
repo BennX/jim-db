@@ -21,7 +21,6 @@
 
 
 #pragma once
-#include "../bench/bench.h"
 #include "itask.h"
 #include "../network/message.h"
 
@@ -43,12 +42,9 @@ namespace jimdb
 
 
             explicit RequestTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message> msg);
-            explicit RequestTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message> msg,
-                                 std::shared_ptr<Bench> bench);
             void operator()() override;
 
         private:
-            std::shared_ptr<Bench> m_bench;
             std::shared_ptr<network::Message> m_msg;
 			static int benchCounter;
         };

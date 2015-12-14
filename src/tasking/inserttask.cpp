@@ -4,11 +4,8 @@
 #include "../datatype/arrayitem.h"
 #include "../common/configuration.h"
 #include "../network/messagefactory.h"
-#include "../assert.h"
-#include "../bench/bench.h"
 #include "taskqueue.h"
 #include "polltask.h"
-#include "../bench/benchmark.h"
 
 namespace jimdb
 {
@@ -19,10 +16,6 @@ namespace jimdb
                                const std::shared_ptr<network::Message>& message): ITask(sock), m_msg(message)
         {}
 
-        InsertTask::InsertTask(const std::shared_ptr<network::AsioHandle>& sock,
-                               const std::shared_ptr<network::Message>& message,
-                               std::shared_ptr<Bench> bench) : ITask(sock), m_msg(message), m_bench(bench)
-        {}
 
         /**
         * Really importand to understand!!
@@ -32,8 +25,6 @@ namespace jimdb
         */
         void InsertTask::operator()()
         {
-            if (m_bench != nullptr)
-                m_bench->setType(Benchmark::INSERT);
             //insert into page
             //we already know that its a valid data and valid document here!
             auto& dat = (*m_msg)()["data"];
