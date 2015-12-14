@@ -1,3 +1,5 @@
+#include "../common/configuration.h"
+
 // /**
 // ############################################################################
 // # GPL License                                                              #
@@ -31,13 +33,20 @@ namespace jimdb
             m_freePages[k] = type;
         }
 
+        void PageIndex::pushToFree(const KEY& k, const VALUE& type)
+        {
+            std::lock_guard<tasking::SpinLock> lock(m_findSpin);
+            m_freePages[k] = type;
+        }
+
 
         std::shared_ptr<memorymanagement::Page> PageIndex::find(const size_t& free)
         {
             //write lock it since we meight delete something
             std::lock_guard<tasking::SpinLock> lock(m_findSpin);
-            if (m_freePages.empty())
-                return nullptr;
+
+            std::shared_ptr<memorymanagement::Page> l_ret = nullptr;
+
             //now find right but backwards
             for (auto it = m_freePages.rbegin(); it != m_freePages.rend();)
             {
@@ -54,11 +63,30 @@ namespace jimdb
                 //check the others
                 if (it->second->free(free))
                 {
-                    return it->second; //dont unlock when returned
+                    //we found a page to fit it
+                    l_ret = it->second;
+                    //delete it from the freepage list
+                    m_freePages.erase(l_ret->getID());
+                    return l_ret;
                 }
                 //increment here
                 ++it;
             }
+
+            if(l_ret == nullptr)
+            {
+                //we didnt find any page so create one and return it
+                //if the ptr is still nullptr we need to create a new Page
+                //well does not fit in any page
+                auto& cfg = common::Configuration::getInstance();
+                l_ret = std::make_shared<memorymanagement::Page>(cfg[common::PAGE_HEADER].GetInt64(),
+                        cfg[common::PAGE_BODY].GetInt64());
+
+                //push this page to the regular index
+                m_index[l_ret->getID()] = l_ret;
+                return l_ret;
+            }
+
             return nullptr;
         }
     }

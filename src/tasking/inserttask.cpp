@@ -39,25 +39,14 @@ namespace jimdb
             //insert it to meta and get the size of the data in memory
             auto l_objSize = checkSizeAndMeta(it->name.GetString(), it->value, l_hashes);
 
-            //Now estimate the next page which has space for l_objSize
-            // get a page which could fit the obj and which is not locked
-            // if its locked we create a new page
-            // so there are depending on the machine up to cpu max
-            // locked pages
+            //optain the page from the index
             auto l_page = index::PageIndex::getInstance().find(l_objSize);
 
-            if (l_page == nullptr)
-            {
-                //if the ptr is still nullptr we need to create a new Page
-                //well does not fit in any page
-                auto& cfg = common::Configuration::getInstance();
-                l_page = std::make_shared<memorymanagement::Page>(cfg[common::PAGE_HEADER].GetInt64(),
-                         cfg[common::PAGE_BODY].GetInt64());
-                //add the new page
-                index::PageIndex::getInstance().add(l_page->getID(), l_page);
-            }
             //insert the obj to the page
             auto oid = l_page->insert(dat);
+
+            //return the page to the index
+            index::PageIndex::getInstance().pushToFree(l_page->getID(), l_page);
 
             //generate answer and return it
             *m_socket << network::MessageFactory().generateResultInsert(oid);

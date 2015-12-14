@@ -37,6 +37,15 @@ namespace jimdb
         std::atomic_ullong Page::m_s_idCounter = 0;
         std::atomic_ullong Page::m_objCount = 0;
 
+        uint64_t GUID::id = 0;
+        tasking::SpinLock GUID::m_lock;
+
+        uint64_t GUID::get()
+        {
+
+            std::lock_guard<tasking::SpinLock> lock(m_lock);
+            return ++id;
+        }
 
         //take care order does matter here since header and body need to be init first to set the freepos values!
         Page::Page(long long header, long long body) : m_id(++m_s_idCounter), m_header(new char[header]),
@@ -87,20 +96,12 @@ namespace jimdb
 
         bool Page::free(size_t size)
         {
-            if (!m_rwLock)
-            {
-                if (find(size, false) != nullptr
-                        && findHeaderPosition(false) != nullptr)
-                {
-                    m_rwLock.writeLock();
-                    return true;
-                }
-            }
-            return false;
+            return find(size, false) != nullptr && findHeaderPosition(false) != nullptr;
         }
 
         size_t Page::insert(const rapidjson::GenericValue<rapidjson::UTF8<>>& value)
         {
+            tasking::RWLockGuard<> lock(m_rwLock, tasking::WRITE);
             //here we know this page has one chunk big enough to fitt the whole object
             //including its overhead! so start inserting it.
 
@@ -112,16 +113,14 @@ namespace jimdb
             auto firstElementPos = insertObject(value.MemberBegin()->value, nullptr).first;
             auto l_first = dist(m_body, firstElementPos);
 
-
             //insert the header
-            auto meta = insertHeader(m_objCount++, 0, common::FNVHash()(name), l_first);
+            HeaderMetaData* meta = insertHeader(m_objCount++, 0, common::FNVHash()(name), l_first);
+			if (meta == nullptr)
+				LOG_DEBUG <<"wm";
             //push the obj to obj index
-            if (meta == nullptr)
-                return 0;
             index::ObjectIndex::getInstance().add(meta->getOID(), index::ObjectIndexValue(this->m_id, dist(m_header, meta)));
-            //done!
 
-            m_rwLock.writeUnlock();
+            //done!
             return meta->getOID();
         }
 
@@ -155,11 +154,11 @@ namespace jimdb
             //calc the start id
             void* start = (static_cast<char*>(m_body) + l_header->getPos());
             auto temp = buildObject(l_objectType, start, l_value, l_obj->GetAllocator());
-			if(temp == nullptr)
-			{
-				LOG_WARN << "build failed id: " << l_header->getOID();
-				return nullptr;
-			}
+            if(temp == nullptr)
+            {
+                LOG_WARN << "build failed id: " << l_header->getOID();
+                return nullptr;
+            }
             //generate name
             auto l_objName = l_meta->getName();
             rapidjson::Value l_name(l_objName.c_str(), l_objName.length(), l_obj->GetAllocator());
@@ -353,7 +352,6 @@ namespace jimdb
 
         void* Page::find(size_t size, bool aloc)
         {
-            std::lock_guard<tasking::SpinLock> lock(m_spin);
             //we cant fit it
             if (size >= m_freeSpace)
                 return nullptr;
@@ -533,14 +531,12 @@ namespace jimdb
 
         HeaderMetaData* Page::insertHeader(size_t id, size_t hash, size_t type, size_t pos)
         {
-            //create the new header at the position of the first element returned
             auto l_meta = new(findHeaderPosition()) HeaderMetaData(id, hash, type, pos);
             return l_meta;
         }
 
         void* Page::findHeaderPosition(bool aloc)
         {
-            std::lock_guard<tasking::SpinLock> lock(m_spin);
             //we cant fit it
             if (sizeof(HeaderMetaData) > m_headerSpace)
                 return nullptr;

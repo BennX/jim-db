@@ -51,6 +51,14 @@ namespace jimdb
 
         class HeaderMetaData;
 
+        class GUID
+        {
+        public:
+	        static uint64_t get();
+        private:
+            static tasking::SpinLock m_lock;
+            static uint64_t id;
+        };
         /**
         \brief The page Class
 

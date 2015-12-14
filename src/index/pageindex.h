@@ -39,6 +39,16 @@ namespace jimdb
 
             inline void add(const KEY& k, const VALUE& type);
             /**
+            \brief add a page back to the Freelist
+
+            If a page is in the free list it gets iterated while checking for a
+            free page. If it is found full it will be erased and only be in the
+            regular index.
+            @author Benjamin Meyer
+            @date 14.12.2015 19:42
+            */
+            inline void pushToFree(const KEY& k, const VALUE& type);
+            /**
             \brief find a unlocked page which can fit free
 
             @param[in] free the size needed
@@ -51,7 +61,7 @@ namespace jimdb
         private:
             PageIndex() {};
 
-	        tasking::SpinLock m_findSpin;
+            tasking::SpinLock m_findSpin;
 
             static PageIndex m_instance;
             stx::btree_map<size_t, std::shared_ptr<memorymanagement::Page>> m_freePages;

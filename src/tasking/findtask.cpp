@@ -35,7 +35,7 @@ namespace jimdb
             auto l_oid = l_data["oid__"].GetInt64();
             if(!index::ObjectIndex::getInstance().contains(l_oid))
             {
-                LOG_WARN << "invalid find task. oid not found";
+                LOG_WARN << "invalid find task. oid not found: " << l_oid;
                 return;
             }
 
