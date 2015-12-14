@@ -73,7 +73,9 @@ namespace jimdb
 
             @return a const reference to the value to not manipulate like
             	index[somekey].add... so its const. If the map is empty, there
-            	was no entry befor calling the operator!
+            	was no entry befor calling the operator. It does generate an empty
+            	VALUE Type if there is no entry like this. So always peek with contains before
+            	requesting
             @author Benjamin Meyer
             @date 22.10.2015 13:22
             */
@@ -89,13 +91,13 @@ namespace jimdb
             /**
             \brief use this with caution!
 
-			Since it meight get manipulated!
+            Since it meight get manipulated!
             @author Benjamin Meyer
             @date 02.11.2015 11:55
             */
             inline stx::btree_map<KEY, VALUE>& get();
 
-			void print();
+            void print();
         protected:
             stx::btree_map<KEY, VALUE> m_index;
             tasking::RWLock m_lock;

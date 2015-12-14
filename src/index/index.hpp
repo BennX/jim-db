@@ -57,7 +57,7 @@ namespace jimdb
         template <typename KEY, typename VALUE>
         inline const VALUE& Index<KEY, VALUE>::operator[](const KEY& name)
         {
-            tasking::RWLockGuard<> lock(m_lock, tasking::WRITE);
+            tasking::RWLockGuard<> lock(m_lock, tasking::READ);
             return m_index[name];
         }
 
