@@ -50,16 +50,6 @@ namespace jimdb
             //now find right but backwards
             for (auto it = m_freePages.rbegin(); it != m_freePages.rend();)
             {
-                //if the page has a chunk where i can compleatly fit
-                // faster then try insert and revert if not fit
-                // else free() > free for a try insert lateron
-
-                if(it->second->full())
-                {
-                    //the page is full erase it from the "free pages"
-                    m_freePages.erase(it++);
-                    continue;
-                }
                 //check the others
                 if (it->second->free(free))
                 {
