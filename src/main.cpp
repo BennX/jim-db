@@ -33,14 +33,9 @@ of memory and allow to querry them.
 #include "common/configuration.h"
 #include "tasking/taskqueue.h"
 #include "common/cmdargs.h"
-#include "thread/worker.h"
 #include <vector>
 #include "network/asioserver.h"
 #include "bench/benchmark.h"
-
-//forward declare
-//class ASIOServer;
-
 
 
 /** terminate function, for suppress exspecially on Windows the abnormal termination
@@ -55,13 +50,20 @@ void program_terminate()
 
 int main(int argc, char* argv[])
 {
-	Benchmark::getInstance().setType(Benchmark::FIND);
     std::set_terminate(program_terminate);
 
     //logger can be at init using the startup log
     auto& args = jimdb::common::CmdArgs::getInstance();
     args.init(argc, argv);
     LOG_DEBUG << args;
+
+    //set the flag to benchmark find instead of insert
+    if(args.contains("-bench"))
+    {
+        if(args["-bench"] == "find")
+            Benchmark::getInstance().setType(Benchmark::FIND);
+    }
+
     if (args.contains("-h"))
     {
         LOG_INFO << "todo print some help if help is needed!";
