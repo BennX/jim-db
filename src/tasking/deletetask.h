@@ -28,10 +28,18 @@ namespace jimdb
     {
         class DeleteTask : public ITask
         {
-		public:
-	        DeleteTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message);
+        public:
+            /**
+            \brief task to delete an object
 
-	        void operator()() override;
+            This task delets an object. If the oid is invalid like it is no int or
+			even missing, it does disconnect the client.
+            @author Benjamin Meyer
+            @date 15.12.2015 09:26
+            */
+            DeleteTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message>& message);
+
+            void operator()() override;
 
         private:
             std::shared_ptr<network::Message> m_msg;

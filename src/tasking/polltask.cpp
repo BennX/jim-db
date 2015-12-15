@@ -38,6 +38,7 @@ namespace jimdb
 
                     LOG_DEBUG << ec.message();
                     m_active = false;
+                    delete[] m_buffer;
                     return;
                 }
 

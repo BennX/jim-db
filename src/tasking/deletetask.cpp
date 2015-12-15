@@ -3,6 +3,8 @@
 #include "../index/pageindex.h"
 #include "../network/messagefactory.h"
 #include "../common/error.h"
+#include "polltask.h"
+#include "taskqueue.h"
 
 namespace jimdb
 {
@@ -21,7 +23,7 @@ namespace jimdb
             if (l_data.FindMember("oid__") == l_data.MemberEnd())
             {
                 LOG_WARN << "invalid delete task. no oid__";
-                // m_client->send(network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::MISSING_OID_DELETE]));
+                *m_socket << network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::MISSING_OID_DELETE]);
                 return;
             }
 
@@ -29,7 +31,7 @@ namespace jimdb
             if (!l_data["oid__"].IsInt64())
             {
                 LOG_WARN << "invalid delete task. oid__ is no int";
-                //  m_client->send(network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::INVALID_OID_DELETE]));
+                *m_socket << network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::INVALID_OID_DELETE]);
                 return;
             }
 
@@ -38,7 +40,8 @@ namespace jimdb
             if (!index::ObjectIndex::getInstance().contains(l_oid))
             {
                 LOG_WARN << "invalid delete task. oid not found";
-                //  m_client->send(network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::OID_NOT_FOUND_DELETE]));
+                *m_socket << network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::OID_NOT_FOUND_DELETE]);
+                TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
                 return;
             }
 

@@ -1,9 +1,31 @@
-﻿#include "findtask.h"
+﻿/**
+############################################################################
+# GPL License                                                              #
+#                                                                          #
+# This file is part of the JIM-DB.                                         #
+# Copyright (c) 2015, Benjamin Meyer, <benjamin.meyer@tu-clausthal.de>     #
+# This program is free software: you can redistribute it and/or modify     #
+# it under the terms of the GNU General Public License as                  #
+# published by the Free Software Foundation, either version 3 of the       #
+# License, or (at your option) any later version.                          #
+#                                                                          #
+# This program is distributed in the hope that it will be useful,          #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+# GNU General Public License for more details.                             #
+#                                                                          #
+# You should have received a copy of the GNU General Public License        #
+# along with this program. If not, see <http://www.gnu.org/licenses/>.     #
+############################################################################
+**/
+
+#include "findtask.h"
 #include "../index/objectindex.h"
 #include "../index/pageindex.h"
 #include "../network/messagefactory.h"
 #include "polltask.h"
 #include "taskqueue.h"
+#include "../common/error.h"
 
 namespace jimdb
 {
@@ -20,14 +42,16 @@ namespace jimdb
             auto& l_data = (*m_msg)()["data"];
             if(l_data.FindMember("oid__") == l_data.MemberEnd())
             {
-                LOG_WARN << "invalid find task. no oid__";
+                //LOG_WARN << "invalid find task. no oid__";
+                *m_socket << network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::MISSING_OID_FIND]);
                 return;
             }
 
             //check if oid id is int
             if(!l_data["oid__"].IsInt64())
             {
-                LOG_WARN << "invalid find task. oid__ is no int";
+                //LOG_WARN << "invalid find task. oid__ is no int";
+                *m_socket << network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::INVALID_OID_FIND]);
                 return;
             }
 
@@ -35,7 +59,9 @@ namespace jimdb
             auto l_oid = l_data["oid__"].GetInt64();
             if(!index::ObjectIndex::getInstance().contains(l_oid))
             {
-                LOG_WARN << "invalid find task. oid not found: " << l_oid;
+                //LOG_WARN << "invalid find task. oid not found: " << l_oid;
+                *m_socket << network::MessageFactory().error(error::ErrorCode::nameOf[error::ErrorCode::OID_NOT_FOUND_FIND]);
+                TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
                 return;
             }
 

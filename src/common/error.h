@@ -24,25 +24,30 @@
 
 namespace jimdb
 {
-	namespace error
-	{
+    namespace error
+    {
 
-		struct ErrorCode
-		{
-			enum ErrorCodes
-			{
-				PARSEERROR_HANDSHAKE,
-				//request stuff
-				INVALID_JSON_REQUEST,
-				MISSING_TYPE_OR_DATA_REQUEST,
-				TYPE_OR_DATA_WRONG_TYPE_REQUEST,
-				INVALID_OID_DELETE,
-				OID_NOT_FOUND_DELETE,
-				MISSING_OID_DELETE,
-				ERROR_CODES_SIZE,
-			};
+        struct ErrorCode
+        {
+            enum ErrorCodes
+            {	//handshake stuff
+                PARSEERROR_HANDSHAKE,
+                //request stuff
+                INVALID_JSON_REQUEST,
+                MISSING_TYPE_OR_DATA_REQUEST,
+                TYPE_OR_DATA_WRONG_TYPE_REQUEST,
+                //find stuff
+                OID_NOT_FOUND_FIND,
+                INVALID_OID_FIND,
+                MISSING_OID_FIND,
+                //delete stuff
+                INVALID_OID_DELETE,
+                OID_NOT_FOUND_DELETE,
+                MISSING_OID_DELETE,
+                ERROR_CODES_SIZE,
+            };
 
-			static const char* nameOf[];
-		};
-	}
+            static const char* nameOf[];
+        };
+    }
 }

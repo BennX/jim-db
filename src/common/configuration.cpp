@@ -131,7 +131,7 @@ namespace jimdb
 
             //1Kib
             name.SetString(ConfigValuesMap::get(PAGE_HEADER), alloc);
-            doc.AddMember(name, 1024, doc.GetAllocator());
+            doc.AddMember(name, 4096, doc.GetAllocator());
 
             //16Kib
             name.SetString(ConfigValuesMap::get(PAGE_BODY), alloc);
@@ -141,7 +141,7 @@ namespace jimdb
             doc.AddMember(name, 250, doc.GetAllocator());
 
             name.SetString(ConfigValuesMap::get(PAGE_FRAGMENTATION_CLEAN), alloc);
-            doc.AddMember(name, 0.1f , doc.GetAllocator());
+            doc.AddMember(name, 0.125f , doc.GetAllocator());
 
             rapidjson::StringBuffer strbuf;
             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);

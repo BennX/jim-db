@@ -43,11 +43,8 @@ namespace jimdb
             }
             catch (std::runtime_error& e)
             {
-                std::string  error = "parsing error Handshake: ";
-                error += e.what();
-                LOG_ERROR << error;
-                //m_client->send(network::MessageFactory().error(
-                //error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::PARSEERROR_HANDSHAKE]));
+                *m_socket << network::MessageFactory().error(
+                              error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::PARSEERROR_HANDSHAKE]);
                 return;
             }
 
@@ -55,8 +52,8 @@ namespace jimdb
             if (l_doc.GetParseError() != rapidjson::kParseErrorNone)
             {
                 LOG_ERROR << "Handshake parsing error.";
-                //m_client->send(network::MessageFactory().error(
-                //error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::PARSEERROR_HANDSHAKE]));
+                *m_socket << network::MessageFactory().error(
+                              error::ErrorCode::nameOf[error::ErrorCode::ErrorCodes::PARSEERROR_HANDSHAKE]);
                 return;
             }
 
@@ -74,16 +71,12 @@ namespace jimdb
             if (std::string("hi") != l_doc["data"]["handshake"].GetString())
             {
                 LOG_WARN << "handshake Failed";
-                //not needed anymore, socket get closed automatically
-                //m_client->close(); //close the soc
                 return; //return on failur
             }
-            //if handshake is valid do something
-//            TaskQueue::getInstance().push_pack(std::make_shared<RequestTask>(m_client));
 
             //after fully request
             LOG_DEBUG << "Handshake Successfull!";
-            TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, PollType::RECEIVE));
+            TaskQueue::getInstance().push_pack(std::make_shared<PollTask>(m_socket, RECEIVE));
         }
     }
 }
