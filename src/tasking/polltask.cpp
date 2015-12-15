@@ -75,7 +75,7 @@ namespace jimdb
                         break;
                     case RECEIVE:
                         TaskQueue::getInstance().push_pack(std::make_shared<RequestTask>(m_socket,
-                                                           std::make_shared<network::Message>(l_buffer)));
+                                                           std::make_shared<network::Message>(l_buffer), std::make_shared<Bench>()));
                         break;
                     default:
                         break;

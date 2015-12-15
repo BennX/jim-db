@@ -1,4 +1,4 @@
-﻿/**
+/**
 ############################################################################
 # GPL License                                                              #
 #                                                                          #
@@ -19,38 +19,25 @@
 ############################################################################
 **/
 
-
 #pragma once
-#include "../bench/bench.h"
-#include "itask.h"
-#include "../network/message.h"
-
+#include <thread>
+#include "../tasking/taskqueue.h"
 namespace jimdb
 {
     namespace tasking
     {
-        /**
-        \brief This task accepts a new request
-
-        It comes right after the handshake and does get the data itself to process.
-        Moreover it does check which type it is and generates the depending task for it.
-        \author Benjamin Meyer
-        \date 02.10.2015 16:20
-        */
-        class RequestTask : public ITask
+        class Worker
         {
         public:
-
-
-            explicit RequestTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message> msg);
-            explicit RequestTask(const std::shared_ptr<network::AsioHandle>& sock, const std::shared_ptr<network::Message> msg,
-                                 std::shared_ptr<Bench> bench);
-            void operator()() override;
+            explicit Worker(TaskQueue& t);
+            ~Worker();
+            void stop();
 
         private:
-            std::shared_ptr<Bench> m_bench;
-            std::shared_ptr<network::Message> m_msg;
-			static int benchCounter;
+            TaskQueue& m_tasks;
+            std::thread m_thread;
+            bool m_running;
+            void doTask();
         };
     }
 }

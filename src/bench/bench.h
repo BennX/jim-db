@@ -19,37 +19,17 @@
 // ############################################################################
 // **/
 #pragma once
-#include "itask.h"
 #include <chrono>
-#include "../network/asiohandle.h"
+#include "benchmark.h"
 
-namespace jimdb
+class Bench
 {
-    namespace tasking
-    {
-        enum PollType
-        {
-            HANDSHAKE,
-            RECEIVE
-        };
-
-        class PollTask : public ITask
-        {
-        public:
-	        bool continuous() override;
-	        explicit PollTask(std::shared_ptr<network::AsioHandle> sock, const PollType& p, const int& timeout = 10000);
-            ~PollTask() override;
-            void operator()() override;
-
-        private:
-            std::chrono::steady_clock::time_point m_last;
-            int m_timeout;
-            char* m_buffer;
-            bool m_active;
-            PollType m_type;
-
-			static int m_counter;
-        };
-    }
-}
-#include "polltask.hpp"
+public:
+    explicit Bench();
+	void setType(const Benchmark::Type t);
+    ~Bench();
+private:
+    int m_id;
+	Benchmark::Type m_type;
+    std::chrono::time_point<std::chrono::steady_clock> m_cycleStart;
+};
