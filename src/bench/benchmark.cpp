@@ -13,7 +13,7 @@ Benchmark& Benchmark::init(const int count, const std::string& filename)
 {
     m_doneValue = count;
     m_filename = filename;
-	m_values.reserve(m_doneValue);//prealocate
+    m_values.reserve(m_doneValue);//prealocate
     return *this;
 }
 
@@ -44,9 +44,10 @@ Benchmark::Benchmark(): m_counter(0), m_logType(INSERT), m_filename("bench.dat")
 std::ostream& operator<<(std::ostream& os, Benchmark& obj)
 {
     std::stringstream ss;
-    for (auto& value : obj.m_values)
+    ss << obj.m_values[0];
+    for (auto i = 1; i < obj.m_values.size(); i++)
     {
-        ss << ";" << value;
+        ss << ";" << obj.m_values[i];
     }
     obj.m_values.clear();
 

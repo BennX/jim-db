@@ -115,8 +115,8 @@ namespace jimdb
 
             //insert the header
             HeaderMetaData* meta = insertHeader(m_objCount++, 0, common::FNVHash()(name), l_first);
-			if (meta == nullptr)
-				LOG_DEBUG <<"wm";
+            if (meta == nullptr)
+                LOG_DEBUG << "wm";
             //push the obj to obj index
             index::ObjectIndex::getInstance().add(meta->getOID(), index::ObjectIndexValue(this->m_id, dist(m_header, meta)));
 
@@ -255,8 +255,6 @@ namespace jimdb
                             auto hash = common::FNVHash()(name);
                             void* l_new = new (l_pos) ObjHashTyp(hash);
 
-
-
                             if (l_prev != nullptr)
                                 l_prev->setNext(dist(l_prev, l_new));
 
@@ -353,7 +351,7 @@ namespace jimdb
         void* Page::find(size_t size, bool aloc)
         {
             //we cant fit it
-            if (size >= m_freeSpace)
+            if (size + sizeof(FreeType) >= m_freeSpace)
                 return nullptr;
             //now get the next free slot which could fit it
             FreeType* l_prev = nullptr;
