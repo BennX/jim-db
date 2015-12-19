@@ -20,6 +20,7 @@
 // **/
 
 #include "pageindex.h"
+#include "../common/configuration.h"
 namespace jimdb
 {
     namespace index
@@ -30,5 +31,23 @@ namespace jimdb
         {
             return m_instance;
         }
+
+        void PageIndex::init()
+        {
+			//first bucket is garanteed to be empty,
+			//new pages will always get into the last bucket
+            if (common::Configuration::getInstance()[common::PAGE_BUCKETS].IsArray()
+                    && common::Configuration::getInstance()[common::PAGE_BUCKETS].Size())
+            {
+                auto& l_bucket = common::Configuration::getInstance()[common::PAGE_BUCKETS];
+                for (auto it = l_bucket.Begin(); it != l_bucket.End(); ++it)
+                {
+                    //simply just get them one to create the inner tree
+                    m_freePages[it->GetInt64()];
+                }
+            }
+        }
+
+        PageIndex::PageIndex() {}
     }
 }

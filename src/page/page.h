@@ -142,7 +142,7 @@ namespace jimdb
             @author Benjamin Meyer
             @date 04.12.2015 10:47
             */
-            bool full();
+            bool hasHeaderSlot();
 
 
         private:
@@ -168,9 +168,6 @@ namespace jimdb
             //Fragmentation is above
             float m_pageClean;
 
-            //the minimum value that need to be free on a page
-            //to not be full
-            int64_t m_full;
 
             /**############################################
             * private Member for body

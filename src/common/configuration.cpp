@@ -41,8 +41,8 @@ namespace jimdb
             "max_tasks",
             "page_header",
             "page_body",
-            "page_full_value",
-            "page_fragmentation_clean"
+            "page_fragmentation_clean",
+            "page_buckets"
         };
 
         //check if valid numer must be the size of the enum!
@@ -84,7 +84,6 @@ namespace jimdb
                 throw std::runtime_error("document is not an object");
 
             //check for default values or values that are not set
-
             check(LOG_FILE);
             check(LOG_LEVEL);
             check(THREADS); //0 means take system default
@@ -94,6 +93,7 @@ namespace jimdb
             check(PAGE_HEADER);
             check(PAGE_BODY);
             check(PAGE_FULL_VALUE);
+            check(PAGE_BUCKETS);
             return true;
         }
 
@@ -137,11 +137,23 @@ namespace jimdb
             name.SetString(ConfigValuesMap::get(PAGE_BODY), alloc);
             doc.AddMember(name, 16384, doc.GetAllocator());
 
-            name.SetString(ConfigValuesMap::get(PAGE_FULL_VALUE), alloc);
-            doc.AddMember(name, 250, doc.GetAllocator());
-
             name.SetString(ConfigValuesMap::get(PAGE_FRAGMENTATION_CLEAN), alloc);
             doc.AddMember(name, 0.125f , doc.GetAllocator());
+
+			//add the page buckets
+            name.SetString(ConfigValuesMap::get(PAGE_BUCKETS), alloc);
+            rapidjson::Value l_array;
+            l_array.SetArray();
+
+            rapidjson::Value l_bucket0(256);
+            rapidjson::Value l_bucket1(512);
+            rapidjson::Value l_bucket2(1024);
+            l_array.PushBack(l_bucket0, doc.GetAllocator());
+            l_array.PushBack(l_bucket1, doc.GetAllocator());
+            l_array.PushBack(l_bucket2, doc.GetAllocator());
+
+            doc.AddMember(name, l_array, doc.GetAllocator());
+
 
             rapidjson::StringBuffer strbuf;
             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);

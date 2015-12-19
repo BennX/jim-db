@@ -42,8 +42,8 @@ namespace jimdb
             MAX_TASKS,
             PAGE_HEADER,
             PAGE_BODY,
-			PAGE_FULL_VALUE,
 			PAGE_FRAGMENTATION_CLEAN,
+			PAGE_BUCKETS,
             SIZE_OF_ENUM,
         };
 

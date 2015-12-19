@@ -35,6 +35,7 @@ of memory and allow to querry them.
 #include "common/cmdargs.h"
 #include <vector>
 #include "network/asioserver.h"
+#include "index/pageindex.h"
 
 //forward declare
 //class ASIOServer;
@@ -111,6 +112,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+
     //set the loglevel of the config or the default log level
     jimdb::common::Logger::getInstance().setLogLevel(cfg[jimdb::common::LOG_LEVEL].GetInt());
     //set the "real logfile" before this we used a "default to log excaptions"
@@ -118,6 +120,9 @@ int main(int argc, char* argv[])
 
     LOG_INFO << cfg; //print out the config
     //after this the logger can be used as regular!
+
+	//init the page index
+	jimdb::index::PageIndex::getInstance().init();
 
     auto& tasks = jimdb::tasking::TaskQueue::getInstance();
     //set up the max number of tasks

@@ -41,13 +41,21 @@ namespace jimdb
 
             //optain the page from the index
             auto l_page = index::PageIndex::getInstance().find(l_objSize);
+            //if we have no free inside the "freebuckets"
+            if(l_page == nullptr)
+            {
+                //generate a new page and add it to the general index
+                auto& cfg = common::Configuration::getInstance();
+                l_page = std::make_shared<memorymanagement::Page>(cfg[common::PAGE_HEADER].GetInt64(),
+                         cfg[common::PAGE_BODY].GetInt64());
+                index::PageIndex::getInstance().add(l_page->getID(), l_page);
+            }
 
             //insert the obj to the page
             auto oid = l_page->insert(dat);
 
-            //return the page to the index if its not full
-            if(!l_page->full())
-                index::PageIndex::getInstance().pushToFree(l_page->getID(), l_page);
+            //return the page to the "freebuckets"
+            index::PageIndex::getInstance().pushToFree(l_page);
 
             //generate answer and return it
             *m_socket << network::MessageFactory().generateResultInsert(oid);

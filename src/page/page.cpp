@@ -51,7 +51,6 @@ namespace jimdb
         Page::Page(long long header, long long body) : m_id(++m_s_idCounter), m_header(new char[header]),
             m_body(new char[body]),
             m_pageClean(common::Configuration::getInstance()[common::PAGE_FRAGMENTATION_CLEAN].GetDouble()),
-            m_full(common::Configuration::getInstance()[common::PAGE_FULL_VALUE].GetInt64()),
             //set the freepos value ptr to the first header slot
             m_freeSpace(body),
             //set the header free pos ptr to the second  "long long" slot
@@ -88,10 +87,10 @@ namespace jimdb
             return m_freeSpace;
         }
 
-
-        bool Page::full()
+        bool Page::hasHeaderSlot()
         {
-            return findHeaderPosition(false) == nullptr || m_freeSpace < m_full;
+            tasking::RWLockGuard<> lock(m_rwLock, tasking::READ);
+            return findHeaderPosition(false) != nullptr;
         }
 
         bool Page::free(size_t size)
@@ -115,8 +114,8 @@ namespace jimdb
 
             //insert the header
             HeaderMetaData* meta = insertHeader(m_objCount++, 0, common::FNVHash()(name), l_first);
-			if (meta == nullptr)
-				LOG_DEBUG <<"wm";
+            if (meta == nullptr)
+                LOG_DEBUG << "wm";
             //push the obj to obj index
             index::ObjectIndex::getInstance().add(meta->getOID(), index::ObjectIndexValue(this->m_id, dist(m_header, meta)));
 

@@ -24,59 +24,57 @@ namespace jimdb
 {
     namespace index
     {
-        void PageIndex::add(const KEY& k, const VALUE& type)
+
+        void PageIndex::pushToFree(const VALUE& type)
         {
             std::lock_guard<tasking::SpinLock> lock(m_findSpin);
-            m_index[k] = type;//at to regular index
 
-            //insert into the "last idx"
-            m_freePages[k] = type;
-        }
+            //insert into the most upper bound index. Guaranteed to be log(n)
+            auto it = m_freePages.upper_bound(static_cast<uint64_t>(type->free()));
 
-        void PageIndex::pushToFree(const KEY& k, const VALUE& type)
-        {
-            std::lock_guard<tasking::SpinLock> lock(m_findSpin);
-            m_freePages[k] = type;
+            //only push if there is a bucket
+            if(it != m_freePages.begin())
+            {
+                //since it is ordered we can simple call -- to get the
+                //next lower element.
+                --it;
+                //push it back
+                it->second.push_back(type);
+            }
+            else
+            {
+                //if we have the first bucket only push it if it fits
+                if (type->free() > it->first)
+                    it->second.push_back(type);
+            }
+
         }
 
 
         std::shared_ptr<memorymanagement::Page> PageIndex::find(const size_t& free)
         {
+
             //write lock it since we meight delete something
             std::lock_guard<tasking::SpinLock> lock(m_findSpin);
 
-            std::shared_ptr<memorymanagement::Page> l_ret = nullptr;
-
-            //now find right but backwards
-            for (auto it = m_freePages.rbegin(); it != m_freePages.rend();)
+            //if we do not find something in the right bound go to the upper
+            for (auto l_bucketIt = m_freePages.upper_bound(free); l_bucketIt != m_freePages.end(); ++l_bucketIt)
             {
-                //check the others
-                if (it->second->free(free))
+                //now find right but backwards
+                for (auto it = l_bucketIt->second.begin(); it != l_bucketIt->second.end(); ++it)
                 {
-                    //we found a page to fit it
-                    l_ret = it->second;
-                    //delete it from the freepage list
-                    m_freePages.erase(l_ret->getID());
-                    return l_ret;
+                    //check the others
+                    if ((*it)->free(free))
+                    {
+                        //we found a page to fit it
+                        auto l_ret = *it;
+                        //delete it from the freepage list
+                        l_bucketIt->second.erase(it);
+                        return l_ret;
+                    }
+                    //break if we get here and got the last element
                 }
-                //increment here
-                ++it;
             }
-
-            if(l_ret == nullptr)
-            {
-                //we didnt find any page so create one and return it
-                //if the ptr is still nullptr we need to create a new Page
-                //well does not fit in any page
-                auto& cfg = common::Configuration::getInstance();
-                l_ret = std::make_shared<memorymanagement::Page>(cfg[common::PAGE_HEADER].GetInt64(),
-                        cfg[common::PAGE_BODY].GetInt64());
-
-                //push this page to the regular index
-                m_index[l_ret->getID()] = l_ret;
-                return l_ret;
-            }
-
             return nullptr;
         }
     }
