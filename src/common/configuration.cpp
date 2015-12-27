@@ -92,7 +92,6 @@ namespace jimdb
             check(MAX_TASKS);
             check(PAGE_HEADER);
             check(PAGE_BODY);
-            check(PAGE_FULL_VALUE);
             check(PAGE_BUCKETS);
             return true;
         }
