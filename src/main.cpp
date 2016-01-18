@@ -1,33 +1,58 @@
-/**
-############################################################################
-# GPL License                                                              #
-#                                                                          #
-# This file is part of the JIM-DB.                                         #
-# Copyright (c) 2015, Benjamin Meyer, <benjamin.meyer@tu-clausthal.de>     #
-# This program is free software: you can redistribute it and/or modify     #
-# it under the terms of the GNU General Public License as                  #
-# published by the Free Software Foundation, either version 3 of the       #
-# License, or (at your option) any later version.                          #
-#                                                                          #
-# This program is distributed in the hope that it will be useful,          #
-# but WITHOUT ANY WARRANTY; without even the implied warranty of           #
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
-# GNU General Public License for more details.                             #
-#                                                                          #
-# You should have received a copy of the GNU General Public License        #
-# along with this program. If not, see <http://www.gnu.org/licenses/>.     #
-############################################################################
-**/
-
-/** \mainpage Wellcome to JIM-DB
+/** \mainpage Wellcome to JIM-DB Doku
 
 \section Introduction
 
-JIM-DB stands for JSON-In-Memory database. It is a System to store objects inside
-of memory and allow to querry them.
+JIM-DB stands for JSON-In-Memory database. It is a System to store JSON objects inside
+of memory and retrive them by their ID. The DB can handle multiple requests at the same time
+depending on the configuration.
+
+<br>
+Here is an example configuration for JIM-DB. Some comments with //. They need to be deleted if 
+you want to use this configuration.
+
+\code
+{
+    "log_level": 5, // if lower the DB get less chaty
+    "log_file": "default.log", 
+    "thread": 0, //how much working threads do you like? 0 = takes the Hardware thread count
+	"ip" : "192.168.2.101", //which ip to bind to
+    "port": 6060,
+    "max_tasks": 16000, //maximum tasks in the queue to prevent from ddos
+    "page_header": 4096, //page header size in byte
+    "page_body": 16384, //page body size in byte
+    "page_fragmentation_clean" : 0.125, // a value to determine when a page need to be cleaned. Cleaning is not implemented yet.
+	"page_buckets": [ //Buckets to categorize the used pages. The last bucket need to be the highest.
+		256, //if a page has at least 256 Byte free if not it is not in the "search free page" list
+		512, //if a page has at least 512 Byte
+		1024 //if a page has at least 1024 Byte
+	]
+}
+\endcode
+
+\section License
+
+ #GPL License
+
+ This file is part of the JIM-DB.                                         <br>
+ Copyright (c) 2015, Benjamin Meyer, <benjamin.meyer@tu-clausthal.de>     <br>
+ This program is free software: you can redistribute it and/or modify     <br>
+ it under the terms of the GNU General Public License as                  <br>
+ published by the Free Software Foundation, either version 3 of the       <br>
+ License, or (at your option) any later version.                          <br>
+                                                                          <br>
+ This program is distributed in the hope that it will be useful,          <br>
+ but WITHOUT ANY WARRANTY; without even the implied warranty of           <br>
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            <br>
+ GNU General Public License for more details.                             <br>
+                                                                          <br>
+ You should have received a copy of the GNU General Public License        <br>
+ along with this program. If not, see <http://www.gnu.org/licenses/>.     <br>
+
 \author Benjamin Meyer
-\date DATE
-*/
+\date 08.01.2016 
+**/
+
+
 #include "log/logger.h"
 #include <thread>
 #include "common/configuration.h"
@@ -37,12 +62,7 @@ of memory and allow to querry them.
 #include "network/asioserver.h"
 #include "index/pageindex.h"
 
-//forward declare
-//class ASIOServer;
-
-
-
-/** terminate function, for suppress exspecially on Windows the abnormal termination
+/** \brief terminate function, for suppress exspecially on Windows the abnormal termination
  * message, that is thrown on uncaught exceptions. The handler need not call the
  * "abort()" function, because this creates the message
  **/
