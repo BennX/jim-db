@@ -34,8 +34,8 @@ namespace jimdb
 {
     namespace memorymanagement
     {
-        std::atomic_ullong Page::m_s_idCounter = 0;
-        std::atomic_ullong Page::m_objCount = 0;
+        std::atomic_ullong Page::m_s_idCounter(0);
+        std::atomic_ullong Page::m_objCount(0);
 
         uint64_t GUID::id = 0;
         tasking::SpinLock GUID::m_lock;
